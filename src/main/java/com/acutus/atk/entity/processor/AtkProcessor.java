@@ -3,6 +3,7 @@ package com.acutus.atk.entity.processor;
 import afu.org.checkerframework.checker.signature.qual.SourceName;
 import com.acutus.atk.entity.AtkFieldUtil;
 import com.acutus.atk.util.Assert;
+import com.acutus.atk.util.Strings;
 import com.google.auto.service.AutoService;
 import lombok.SneakyThrows;
 
@@ -19,14 +20,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.acutus.atk.util.AtkUtil.handle;
+
 @SupportedAnnotationTypes(
-        "com.acutus.atk.entity.processor.AtkEntity")
+        "com.acutus.atk.entity.processor.Atk")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
-public class AtkEntityProcessor extends AbstractProcessor {
+public class AtkProcessor extends AbstractProcessor {
 
-    private void print(String msg) {
+    protected void warning(String msg) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, msg);
+    }
+
+    protected void info(String msg) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, msg);
     }
 
     @SneakyThrows
@@ -34,7 +41,7 @@ public class AtkEntityProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations,
                            RoundEnvironment roundEnv) {
 
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "Stated");
+        info("Started");
 
         for (TypeElement annotation : annotations) {
             roundEnv.getElementsAnnotatedWith(annotation).stream()
@@ -44,16 +51,27 @@ public class AtkEntityProcessor extends AbstractProcessor {
         return true;
     }
 
-    private void processElement(String className, Element element) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "Process " + element.getSimpleName());
+    protected void processElement(String className, Element element) {
+        String source = getElement(className, element)
+                .stream()
+                .reduce((s1, s2) -> s1 + "\n" + s2)
+                .get();
+        info(source);
+        writeFile(className, source);
+    }
 
-        List<String> entity = new ArrayList<>();
+    protected Strings getElement(String className, Element element) {
+        info("Process " + element.getSimpleName());
+
+        Strings entity = new Strings();
 
         String packageName = className.substring(0, className.lastIndexOf("."));
         entity.add("package " + packageName + ";");
         entity.add("import com.acutus.atk.entity.*;");
 
-        entity.add("public class " + element.getSimpleName() + "Imp extends com.acutus.atk.entity.AbstractAtkEntity {");
+        entity.add("public class " + element.getSimpleName() + "Imp extends com.acutus.atk.entity.AbstractAtk {");
+
+        info("Entity " + entity);
 
         // add all the fields
         element.getEnclosedElements().stream()
@@ -62,24 +80,25 @@ public class AtkEntityProcessor extends AbstractProcessor {
                     entity.add(getField(e));
                     entity.add(getAtkField(className, e));
                     entity.add(getGetter(e));
-                    entity.add(getSetter(className,e));
+                    entity.add(getSetter(className, e));
                 });
         entity.add("}");
-        String source = entity.stream().reduce((s1, s2) -> s1 + "\n" + s2).get();
-        print(entity.stream().reduce((s1, s2) -> s1 + "\n" + s2).get());
-        writeFile(className,source);
+
+        info("compile " + entity);
+        return entity;
     }
 
-    private String getField(Element element) {
-
-        return element.getAnnotationMirrors().stream()
-                .map(a -> a.toString())
-                .reduce((s1, s2) -> "@" + s1 + "\n" + "@" + s2).get()
-                + "\n"
-                + String.format("private %s %s;", element.asType().toString(), element.getSimpleName());
+    protected String getField(Element element) {
+        return (!element.getAnnotationMirrors().isEmpty() ?
+                (element.getAnnotationMirrors().stream()
+                        .map(a -> a.toString())
+                        .reduce((s1, s2) -> "@" + s1 + "\n" + "@" + s2).get()
+                        + "\n")
+                : "")
+                + String.format("protected %s %s;", element.asType().toString(), element.getSimpleName());
     }
 
-    private String getAtkField(String className, Element element) {
+    protected String getAtkField(String className, Element element) {
         return String.format("public AtkField<%s,%sImp> _%s = new AtkField<>(%s.class,%s,this);"
                 , element.asType().toString(), className, element.getSimpleName()
                 , element.asType().toString()
@@ -87,21 +106,21 @@ public class AtkEntityProcessor extends AbstractProcessor {
         );
     }
 
-    private String methodName(String fieldName) {
+    protected String methodName(String fieldName) {
         return fieldName.substring(0, 1).toUpperCase() + (fieldName.length() > 0 ? fieldName.substring(1) : "");
     }
 
-    private String getSetter(String className,Element element) {
+    protected String getSetter(String className, Element element) {
         return String.format("public %sImp set%s(%s %s) {"
                         + "this._%s.set(%s);"
                         + "return this;"
                         + "};"
                 , className, methodName(element.getSimpleName().toString()), element.asType().toString()
                 , element.getSimpleName().toString()
-                ,element.getSimpleName().toString(),element.getSimpleName().toString());
+                , element.getSimpleName().toString(), element.getSimpleName().toString());
     }
 
-    private String getGetter(Element element) {
+    protected String getGetter(Element element) {
         return String.format("public %s get%s() {"
                         + "return this._%s.get();"
                         + "};"
@@ -111,9 +130,9 @@ public class AtkEntityProcessor extends AbstractProcessor {
 
 
     @SneakyThrows
-    private void writeFile(String className, String source) {
+    protected void writeFile(String className, String source) {
 
-        JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(className+"Imp");
+        JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(className + "Imp");
 
         try (PrintWriter out = new PrintWriter(builderFile.openWriter())) {
             out.print(source);

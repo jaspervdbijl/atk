@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class AtkFieldList extends ArrayList<AtkField> {
+public class AtkFieldList<T extends AtkField> extends ArrayList<T> {
 
     public AtkFieldList getChanged() {
         return stream().filter(f -> f.isChanged()).collect(Collectors.toCollection(AtkFieldList::new));

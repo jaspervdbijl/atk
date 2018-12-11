@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import static com.acutus.atk.util.AtkUtil.handle;
 
-public class AbstractAtkEntity {
+public class AbstractAtk {
 
     private List<Class> getPathToRoot(List<Class> sources,Class source) {
         if (!source.equals(Object.class)) {
@@ -26,9 +26,10 @@ public class AbstractAtkEntity {
     }
 
 
-    public AtkFieldList getFields() {
-        return getRefFields().stream()
+    public <T extends AtkFieldList> T getFields() {
+        return (T) getRefFields().stream()
                 .map(f -> (AtkField) handle(() -> f.get(this)))
                 .collect(Collectors.toCollection(AtkFieldList::new));
     }
+
 }
