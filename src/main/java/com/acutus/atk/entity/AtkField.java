@@ -24,7 +24,7 @@ public class AtkField<T,R> {
     private Class<T> type;
 
     @Getter @Setter
-    private boolean audit,changed;
+    private boolean audit,changed,set;
 
     public AtkField(Class<T> type,Field field,R entity) {
         this.type = type;
@@ -45,6 +45,7 @@ public class AtkField<T,R> {
             oldValue = (T) field.get(entity);
         }
         changed = !AtkUtil.equals(field.get(entity),value);
+        set = true;
         field.set(entity,value);
         return entity;
     }

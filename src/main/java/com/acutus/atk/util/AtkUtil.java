@@ -5,7 +5,12 @@ import lombok.SneakyThrows;
 public class AtkUtil {
 
     @SneakyThrows
-    public static <T,R> R handle(Call.OneEx<R> call) {
+    public static void handle(Call.Zero call) {
+        call.call();
+    }
+
+    @SneakyThrows
+    public static <T,R> R handle(Call.One<R> call) {
         return call.call();
     }
 

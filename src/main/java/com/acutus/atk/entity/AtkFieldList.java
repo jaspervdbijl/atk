@@ -7,8 +7,12 @@ import java.util.stream.Collectors;
 
 public class AtkFieldList<T extends AtkField> extends ArrayList<T> {
 
-    public AtkFieldList getChanged() {
+    public AtkFieldList<T> getChanged() {
         return stream().filter(f -> f.isChanged()).collect(Collectors.toCollection(AtkFieldList::new));
+    }
+
+    public AtkFieldList<T> getSet() {
+        return stream().filter(f -> f.isSet()).collect(Collectors.toCollection(AtkFieldList::new));
     }
 
     public List<String> getNames() {

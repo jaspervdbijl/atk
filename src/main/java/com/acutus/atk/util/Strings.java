@@ -1,13 +1,17 @@
 package com.acutus.atk.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import lombok.NoArgsConstructor;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@NoArgsConstructor
 public class Strings extends ArrayList<String> {
+
+    public Strings(Collection<String> collection) {
+        addAll(collection);
+    }
 
     /**
      * return all the indexes of strings that contains the text
@@ -31,6 +35,19 @@ public class Strings extends ArrayList<String> {
 
     @Override
     public String toString() {
-        return stream().reduce((s1,s2)-> s1+"\n"+s2).get();
+        return toString("\n");
     }
+
+    public String toString(String del) {
+        return stream().reduce((s1,s2)-> s1+del+s2).get();
+    }
+
+    public Strings prepend(String value) {
+        return new Strings(stream().map(s -> value + s).collect(Collectors.toList()));
+    }
+
+    public Strings append(String value) {
+        return new Strings(stream().map(s -> s + value).collect(Collectors.toList()));
+    }
+
 }

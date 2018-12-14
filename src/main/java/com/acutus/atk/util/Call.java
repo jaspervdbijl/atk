@@ -4,16 +4,17 @@ import lombok.AllArgsConstructor;
 
 public class Call{
 
-    public static interface One<T> {
-        public T call();
+
+    public static interface Zero<T> {
+        public void call() throws Exception;
     }
 
-    public static interface OneEx<T> {
+    public static interface One<T> {
         public T call() throws Exception;
     }
 
     public static interface Two<T,R> {
-        public R call(T t);
+        public R call(T t) throws Exception;
     }
 
     public static interface Three<A,B,R> {
