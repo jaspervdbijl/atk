@@ -13,6 +13,10 @@ public class Strings extends ArrayList<String> {
         addAll(collection);
     }
 
+    public static Strings asList(String... strings) {
+        return new Strings(Arrays.asList(strings));
+    }
+
     /**
      * return all the indexes of strings that contains the text
      * @param text
@@ -49,5 +53,16 @@ public class Strings extends ArrayList<String> {
     public Strings append(String value) {
         return new Strings(stream().map(s -> s + value).collect(Collectors.toList()));
     }
+
+    public Strings plus(String... values) {
+        return plus(Arrays.asList(values));
+    }
+
+    public Strings plus(Collection<String> values) {
+        Strings strings = new Strings(this);
+        strings.addAll(values);
+        return strings;
+    }
+
 
 }

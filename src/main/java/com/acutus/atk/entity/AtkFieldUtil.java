@@ -14,8 +14,8 @@ public class AtkFieldUtil {
                 .filter(f -> name.equals(f.getName()))
                 .findFirst();
 
-        Assert.isTrue(field.isPresent()
+        Assert.isTrue(field.isPresent() || !Object.class.equals(type.getSuperclass())
                 ,() -> new RunException("Field not found %s in class %s",name,type.getName()));
-        return field.get();
+        return field.isPresent() ? field.get() : getFieldByName(type.getSuperclass(), name);
     }
 }

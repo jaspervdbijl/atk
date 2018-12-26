@@ -27,7 +27,7 @@ public class Assert {
     }
 
     @SneakyThrows
-    public static void isTrue(boolean value, Call.One<RuntimeException> call) {
+    public static void isTrue(boolean value, Call.ZeroRet<RuntimeException> call) {
         if (!value) {
             RuntimeException ex = call.call();
             log.log( Level.WARNING,ex.getMessage(),ex);

@@ -8,5 +8,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface Atk {
-    boolean includeAll() default true;
+    String className() default "";
+
+    String classNameExt() default "Entity";
 }

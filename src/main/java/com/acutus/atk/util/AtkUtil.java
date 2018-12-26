@@ -10,7 +10,7 @@ public class AtkUtil {
     }
 
     @SneakyThrows
-    public static <T,R> R handle(Call.One<R> call) {
+    public static <T, R> R handle(Call.ZeroRet<R> call) {
         return call.call();
     }
 

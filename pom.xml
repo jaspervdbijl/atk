@@ -5,7 +5,7 @@
 
 	<groupId>com.acutus</groupId>
 	<artifactId>atk</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>atk</name>
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<scope>provided</scope>
 			<version>${lombok.version}</version>
 		</dependency>
 	</dependencies>

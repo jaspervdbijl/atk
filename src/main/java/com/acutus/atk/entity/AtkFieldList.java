@@ -1,11 +1,19 @@
 package com.acutus.atk.entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AtkFieldList<T extends AtkField> extends ArrayList<T> {
+
+    public AtkFieldList() {
+    }
+
+    public AtkFieldList(Collection<T> collection) {
+        super.addAll(collection);
+    }
 
     public AtkFieldList<T> getChanged() {
         return stream().filter(f -> f.isChanged()).collect(Collectors.toCollection(AtkFieldList::new));
