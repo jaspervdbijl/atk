@@ -95,6 +95,8 @@ public class AtkProcessor extends AbstractProcessor {
         entity.add(getClassNameLine(element));
 
         entity.add(getConstructors(element).append("\n").toString(""));
+        entity.add(getExtraFields(element).append(";\n").toString(""));
+
         entity.add(getMethods(className, element).append("\n").toString(""));
 
         // add all the fields
@@ -107,12 +109,16 @@ public class AtkProcessor extends AbstractProcessor {
                 });
         entity.add("}");
 
+        info(entity.toString("\n"));
         return entity;
     }
 
+    protected Strings getExtraFields(Element parent) {
+        return new Strings();
+    }
 
     protected String getAtkField(Element parent, Element e) {
-        return String.format("public AtkField<%s,%s> _%s = new AtkField<>(%s.class,%s,this);"
+        return String.format("public transient AtkField<%s,%s> _%s = new AtkField<>(%s.class,%s,this);"
                 , e.asType().toString(), getClassName(parent), e.getSimpleName()
                 , e.asType().toString()
                 , String.format("AtkFieldUtil.getFieldByName(%s.class,\"%s\")"
