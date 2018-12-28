@@ -14,8 +14,6 @@ import javax.tools.JavaFileObject;
 import java.io.PrintWriter;
 import java.util.Set;
 
-import static com.acutus.atk.entity.processor.ProcessorHelper.GET_FIELDS;
-
 @SupportedAnnotationTypes(
         "com.acutus.atk.entity.processor.Atk")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -71,8 +69,7 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected String getClassNameLine(Element element) {
-        return String.format("public class %s extends %s " +
-                "implements AbstractAtk {", getClassName(element), element.getSimpleName());
+        return String.format("public class %s extends AbstractAtk {", getClassName(element));
     }
 
     protected Strings getConstructors(Element element) {
@@ -80,29 +77,27 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected Strings getMethods(String className, Element element) {
-        return Strings.asList(GET_FIELDS);
+        return Strings.asList();
     }
 
 
     protected Strings getElement(String className, Element element) {
         info("Process " + element.getSimpleName());
 
-        Strings entity = new Strings();
+        Strings entity = new DebugStrings();
 
         entity.add(getPackage(className, element) + ";");
         entity.add(getImports().append(";\n").toString(""));
-
         entity.add(getClassNameLine(element));
-
         entity.add(getConstructors(element).append("\n").toString(""));
         entity.add(getExtraFields(element).append(";\n").toString(""));
-
         entity.add(getMethods(className, element).append("\n").toString(""));
 
         // add all the fields
         element.getEnclosedElements().stream()
                 .filter(f -> ElementKind.FIELD.equals(f.getKind()))
                 .forEach(e -> {
+                    entity.add(getField(e));
                     entity.add(getAtkField(element, e));
                     entity.add(getGetter(element, e));
                     entity.add(getSetter(element, e));
@@ -111,6 +106,23 @@ public class AtkProcessor extends AbstractProcessor {
 
         info(entity.toString("\n"));
         return entity;
+    }
+
+    protected String getField(Element element) {
+        String annotations =
+                (!element.getAnnotationMirrors().isEmpty() ?
+                        (element.getAnnotationMirrors().stream()
+                                .map(a -> a.toString())
+                                .reduce((s1, s2) -> "@" + s1 + "\n" + "@" + s2).get()
+                                + "\n")
+                        : "");
+        String modifiers =
+                (!element.getModifiers().isEmpty() ? element.getModifiers().stream()
+                        .map(m -> m.toString())
+                        .reduce((s1, s2) -> s1 + " " + s2).get()
+                        : "");
+        return String.format("%s %s %s %s;", annotations, modifiers
+                , element.asType().toString(), element.getSimpleName());
     }
 
     protected Strings getExtraFields(Element parent) {
@@ -156,6 +168,15 @@ public class AtkProcessor extends AbstractProcessor {
 
         try (PrintWriter out = new PrintWriter(builderFile.openWriter())) {
             out.print(source);
+        }
+    }
+
+    public class DebugStrings extends Strings {
+
+        @Override
+        public boolean add(String s) {
+            info(s);
+            return super.add(s);
         }
     }
 

@@ -12,12 +12,6 @@ import java.nio.file.Paths;
 
 public class ProcessorHelper {
 
-    public static String GET_FIELDS = "public AtkFieldList getFields() {\n" +
-            "        return (AtkFieldList) getRefFields().stream()\n" +
-            "                .map(f -> (AtkField) handle(() -> ((Field) f).get(this)))\n" +
-            "                .collect(Collectors.toCollection(AtkFieldList::new));\n" +
-            "    }";
-
     @SneakyThrows
     public static String getSourcePath(ProcessingEnvironment pEnv) {
         Filer filer = pEnv.getFiler();

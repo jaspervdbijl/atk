@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 
 import static com.acutus.atk.util.AtkUtil.handle;
 
-public interface AbstractAtk<T> {
+public class AbstractAtk<T> {
 
-    public default List<Class> getPathToRoot(List<Class> sources, Class source) {
+    public List<Class> getPathToRoot(List<Class> sources, Class source) {
         if (!source.equals(Object.class)) {
             sources.add(source);
             getPathToRoot(sources,source.getSuperclass());
@@ -18,7 +18,7 @@ public interface AbstractAtk<T> {
         return sources;
     }
 
-    public default List<Field> getRefFields() {
+    public List<Field> getRefFields() {
         return getPathToRoot(new ArrayList<>(),getClass())
                 .stream()
                 .flatMap(c -> Arrays.stream(c.getDeclaredFields())).filter(f -> AtkField.class.isAssignableFrom(f.getType()))
@@ -26,7 +26,7 @@ public interface AbstractAtk<T> {
     }
 
 
-    public default <T extends AtkFieldList> T getFields() {
+    public <T extends AtkFieldList> T getFields() {
         return (T) getRefFields().stream()
                 .map(f -> (AtkField) handle(() -> f.get(this)))
                 .collect(Collectors.toCollection(AtkFieldList::new));

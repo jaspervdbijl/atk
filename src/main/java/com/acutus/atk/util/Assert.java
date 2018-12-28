@@ -1,5 +1,6 @@
 package com.acutus.atk.util;
 
+import com.acutus.atk.util.call.CallNilRet;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
@@ -27,7 +28,7 @@ public class Assert {
     }
 
     @SneakyThrows
-    public static void isTrue(boolean value, Call.ZeroRet<RuntimeException> call) {
+    public static void isTrue(boolean value, CallNilRet<RuntimeException> call) {
         if (!value) {
             RuntimeException ex = call.call();
             log.log( Level.WARNING,ex.getMessage(),ex);

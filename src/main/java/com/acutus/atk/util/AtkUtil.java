@@ -1,16 +1,18 @@
 package com.acutus.atk.util;
 
+import com.acutus.atk.util.call.CallNil;
+import com.acutus.atk.util.call.CallNilRet;
 import lombok.SneakyThrows;
 
 public class AtkUtil {
 
     @SneakyThrows
-    public static void handle(Call.Zero call) {
+    public static void handle(CallNil call) {
         call.call();
     }
 
     @SneakyThrows
-    public static <T, R> R handle(Call.ZeroRet<R> call) {
+    public static <T, R> R handle(CallNilRet<R> call) {
         return call.call();
     }
 

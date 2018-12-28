@@ -42,8 +42,8 @@ public class Strings extends ArrayList<String> {
         return toString("\n");
     }
 
-    public String toString(String del) {
-        return stream().reduce((s1,s2)-> s1+del+s2).get();
+    public static void main(String[] args) {
+        System.out.println(new Strings().append(";\n").toString(""));
     }
 
     public Strings prepend(String value) {
@@ -62,6 +62,10 @@ public class Strings extends ArrayList<String> {
         Strings strings = new Strings(this);
         strings.addAll(values);
         return strings;
+    }
+
+    public String toString(String del) {
+        return !isEmpty() ? stream().reduce((s1, s2) -> s1 + del + s2).get() : "";
     }
 
 
