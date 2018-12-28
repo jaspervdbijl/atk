@@ -21,7 +21,8 @@ public class AbstractAtk<T> {
     public List<Field> getRefFields() {
         return getPathToRoot(new ArrayList<>(),getClass())
                 .stream()
-                .flatMap(c -> Arrays.stream(c.getDeclaredFields())).filter(f -> AtkField.class.isAssignableFrom(f.getType()))
+                .flatMap(c -> Arrays.stream(c.getDeclaredFields()))
+                .filter(f -> AtkField.class.isAssignableFrom(f.getType()))
                 .collect(Collectors.toList());
     }
 
