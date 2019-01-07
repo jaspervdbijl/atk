@@ -3,7 +3,9 @@ package com.acutus.atk.entity;
 
 import com.acutus.atk.util.Assert;
 import com.acutus.atk.util.AtkUtil;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
 
@@ -48,6 +50,11 @@ public class AtkField<T,R> {
         set = true;
         field.set(entity,value);
         return entity;
+    }
+
+    public void reset() {
+        changed = false;
+        set = false;
     }
 
     @SneakyThrows
