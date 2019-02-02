@@ -1,10 +1,14 @@
 package com.acutus.atk.util;
 
+import com.acutus.atk.util.call.CallOneRet;
 import lombok.NoArgsConstructor;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static com.acutus.atk.util.AtkUtil.handle;
 
 @NoArgsConstructor
 public class Strings extends ArrayList<String> {
@@ -38,6 +42,21 @@ public class Strings extends ArrayList<String> {
     }
 
     @Override
+    public Strings clone() {
+        return new Strings(this);
+    }
+
+    /**
+     * @param filter
+     * @return a new instance with items matching filter removed
+     */
+    public Strings removeWhen(Predicate<String> filter) {
+        Strings clone = clone();
+        clone.removeIf(filter);
+        return clone;
+    }
+
+    @Override
     public String toString() {
         return toString("\n");
     }
@@ -66,6 +85,52 @@ public class Strings extends ArrayList<String> {
 
     public String toString(String del) {
         return !isEmpty() ? stream().reduce((s1, s2) -> s1 + del + s2).get() : "";
+    }
+
+    public Strings toUpper() {
+        return stream().map(s -> s != null ? s.toUpperCase() : s).collect(Collectors.toCollection(Strings::new));
+    }
+
+    public Strings toLower() {
+        return stream().map(s -> s != null ? s.toLowerCase() : s).collect(Collectors.toCollection(Strings::new));
+    }
+
+    /**
+     * return the index of an item that contains the value
+     *
+     * @param value
+     * @return
+     */
+    public OptionalInt getInsideIndex(String value) {
+        return IntStream.range(0, size())
+                .filter(i -> get(i) != null && get(i).contains(value))
+                .findAny();
+    }
+
+    /**
+     * return if this contains a string with value
+     *
+     * @param value
+     * @return
+     */
+    public boolean containsInside(String value) {
+        return getInsideIndex(value).isPresent();
+    }
+
+    public boolean containsIgnoreCase(String value) {
+        return toLower().contains(value.toLowerCase());
+    }
+
+    /**
+     * transform a new strings set with call
+     *
+     * @param call
+     * @return
+     */
+    public Strings transform(CallOneRet<String, String> call) {
+        return stream()
+                .map(s -> handle(() -> call.call(s)))
+                .collect(Collectors.toCollection(Strings::new));
     }
 
 

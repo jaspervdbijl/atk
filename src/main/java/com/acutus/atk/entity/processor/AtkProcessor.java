@@ -113,7 +113,6 @@ public class AtkProcessor extends AbstractProcessor {
                 (!element.getAnnotationMirrors().isEmpty() ?
                         (element.getAnnotationMirrors().stream()
                                 .map(a -> a.toString())
-//                                .reduce((s1, s2) -> "@" + s1 + "\n" + "@" + s2).get()
                                 .reduce((s1, s2) -> s1 + "\n" + s2).get()
                                 + "\n")
                         : "");
