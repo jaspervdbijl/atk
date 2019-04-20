@@ -22,14 +22,10 @@ public class AtkField<T,R> {
 
     private com.acutus.atk.entity.processor.AtkField atkField;
 
-    @Getter
-    private Class<T> type;
-
     @Getter @Setter
     private boolean audit,changed,set;
 
-    public AtkField(Class<T> type,Field field,R entity) {
-        this.type = type;
+    public AtkField(Field field, R entity) {
         this.field = field;
         this.entity = entity;
         this.field.setAccessible(true);
@@ -39,6 +35,10 @@ public class AtkField<T,R> {
     public void init(com.acutus.atk.entity.processor.AtkField atkField) {
         if (atkField == null) return;
         audit = atkField.audit();
+    }
+
+    public Class<T> getType() {
+        return (Class<T>) field.getType();
     }
 
     @SneakyThrows

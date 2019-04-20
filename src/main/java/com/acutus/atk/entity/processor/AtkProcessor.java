@@ -24,6 +24,10 @@ public class AtkProcessor extends AbstractProcessor {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, msg);
     }
 
+    protected void error(String msg) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, msg);
+    }
+
     protected void info(String msg) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, msg);
     }
@@ -54,7 +58,8 @@ public class AtkProcessor extends AbstractProcessor {
 
     protected Strings getImports() {
         return Strings.asList("import com.acutus.atk.entity.*", "import static com.acutus.atk.util.AtkUtil.handle"
-                , "import java.util.stream.Collectors", "import java.lang.reflect.Field");
+                , "import java.util.stream.Collectors", "import java.lang.reflect.Field"
+                , "import com.acutus.atk.reflection.Reflect");
     }
 
     protected String getPackage(String className, Element element) {
@@ -130,10 +135,9 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected String getAtkField(Element parent, Element e) {
-        return String.format("public transient AtkField<%s,%s> _%s = new AtkField<>(%s.class,%s,this);"
+        return String.format("public transient AtkField<%s,%s> _%s = new AtkField<>(%s,this);"
                 , e.asType().toString(), getClassName(parent), e.getSimpleName()
-                , e.asType().toString()
-                , String.format("AtkFieldUtil.getFieldByName(%s.class,\"%s\")"
+                , String.format("Reflect.getFields(%s.class).getByName(\"%s\").get()"
                         , getClassName(parent), e.getSimpleName())
         );
     }

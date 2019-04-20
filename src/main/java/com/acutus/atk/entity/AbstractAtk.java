@@ -1,8 +1,8 @@
 package com.acutus.atk.entity;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
+import com.acutus.atk.reflection.Reflect;
+import com.acutus.atk.reflection.ReflectFields;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,17 +18,14 @@ public class AbstractAtk<T> {
         return sources;
     }
 
-    public List<Field> getRefFields() {
-        return getPathToRoot(new ArrayList<>(),getClass())
-                .stream()
-                .flatMap(c -> Arrays.stream(c.getDeclaredFields()))
-                .filter(f -> AtkField.class.isAssignableFrom(f.getType()))
-                .collect(Collectors.toList());
+    public ReflectFields getRefFields() {
+        return Reflect.getFields(getClass());
     }
 
-
     public <T extends AtkFieldList> T getFields() {
-        return (T) getRefFields().stream()
+        return (T) getRefFields()
+                .filterType(AtkField.class)
+                .stream()
                 .map(f -> (AtkField) handle(() -> f.get(this)))
                 .collect(Collectors.toCollection(AtkFieldList::new));
     }
