@@ -37,4 +37,20 @@ public class AtkUtil {
         return getGenericType(clazz, 0);
     }
 
+    /**
+     * if the class is a defined primitive type
+     *
+     * @param type
+     * @return
+     */
+    public static boolean isPrimitive(String type) {
+        return type.startsWith("java.lang.") ||
+                type.startsWith("java.time.Local");
+    }
+
+    public static boolean isPrimitive(Class type) {
+        return isPrimitive(type.getName());
+    }
+
+
 }

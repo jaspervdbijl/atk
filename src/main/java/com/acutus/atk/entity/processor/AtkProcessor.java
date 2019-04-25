@@ -13,6 +13,7 @@ import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.PrintWriter;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes(
         "com.acutus.atk.entity.processor.Atk")
@@ -74,7 +75,16 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected String getClassNameLine(Element element) {
-        return String.format("public class %s extends AbstractAtk {", getClassName(element));
+        // copy all Annotations over except lombok
+        String annotations = element.getAnnotationMirrors().stream()
+                .map(a -> a.toString()).collect(Collectors.joining(" "))
+                .replace("@lombok.NoArgsConstructor", "")
+                .replace("@lombok.AllArgsConstructor", "")
+                .replace("@lombok.Builder", "");
+        // replace Atk annotation
+        annotations = annotations.replace("@com.acutus.atk.entity.processor.Atk", "");
+        return annotations + "\n" + String.format("public class %s extends AbstractAtk<%s,%s> {"
+                , getClassName(element), getClassName(element), element.getSimpleName());
     }
 
     protected Strings getConstructors(Element element) {
@@ -85,6 +95,16 @@ public class AtkProcessor extends AbstractProcessor {
         return Strings.asList();
     }
 
+    /**
+     * expand to include other supported field types
+     *
+     * @param type
+     * @return
+     */
+    private boolean isPrimitive(String type) {
+        return type.startsWith("java.lang.") ||
+                type.startsWith("java.time.Local");
+    }
 
     protected Strings getElement(String className, Element element) {
         info("Process " + element.getSimpleName());
@@ -100,7 +120,7 @@ public class AtkProcessor extends AbstractProcessor {
 
         // add all the fields
         element.getEnclosedElements().stream()
-                .filter(f -> ElementKind.FIELD.equals(f.getKind()))
+                .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f.asType().toString()))
                 .forEach(e -> {
                     entity.add(getField(e));
                     entity.add(getAtkField(element, e));

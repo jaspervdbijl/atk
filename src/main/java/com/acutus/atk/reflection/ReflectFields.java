@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.acutus.atk.util.AtkUtil.handle;
+
 /**
  * Created by jaspervdb on 2016/06/08.
  */
@@ -99,6 +101,23 @@ public class ReflectFields extends ArrayList<Field> {
         } catch (IllegalAccessException ie) {
             throw new RuntimeException(ie);
         }
+    }
+
+    /**
+     * copy matching field by name and type
+     */
+    public ReflectFields copyMatchingTo(Object source, ReflectFields dstFields, Object destination, ReflectFields exclude) {
+        stream().filter(f ->
+                dstFields.getByName(f.getName()).isPresent()
+                        && f.getType().equals(dstFields.getByName(f.getName()).get().getType()) &&
+                        !exclude.getByName(f.getName()).isPresent()
+        )
+                .forEach(f -> handle(() -> dstFields.getByName(f.getName()).get().set(destination, f.get(source))));
+        return this;
+    }
+
+    public ReflectFields copyMatchingTo(Object source, ReflectFields dstFields, Object destination) {
+        return copyMatchingTo(source, dstFields, destination, new ReflectFields());
     }
 
 }

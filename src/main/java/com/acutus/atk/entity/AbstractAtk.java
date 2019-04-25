@@ -2,13 +2,16 @@ package com.acutus.atk.entity;
 
 import com.acutus.atk.reflection.Reflect;
 import com.acutus.atk.reflection.ReflectFields;
+import lombok.SneakyThrows;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.acutus.atk.util.AtkUtil.getGenericType;
 import static com.acutus.atk.util.AtkUtil.handle;
 
-public class AbstractAtk<T> {
+// T the current instance and O is the original dao entity
+public class AbstractAtk<T, O> {
 
     public List<Class> getPathToRoot(List<Class> sources, Class source) {
         if (!source.equals(Object.class)) {
@@ -29,5 +32,25 @@ public class AbstractAtk<T> {
                 .map(f -> (AtkField) handle(() -> f.get(this)))
                 .collect(Collectors.toCollection(AtkFieldList::new));
     }
+
+    /**
+     * @return the base type form which the entity was generated
+     */
+    @SneakyThrows
+    public O toBase() {
+        O base = (O) getGenericType(getClass(), 1).getConstructor().newInstance();
+        getRefFields().copyMatchingTo(this, Reflect.getFields(base.getClass()), base);
+        return base;
+    }
+
+    public T initFrom(O base, AtkFieldList exclude) {
+        Reflect.getFields(base.getClass()).copyMatchingTo(base, getRefFields(), this, exclude.toRefFields());
+        return (T) this;
+    }
+
+    public T initFrom(O base) {
+        return initFrom(base, new AtkFieldList());
+    }
+
 
 }
