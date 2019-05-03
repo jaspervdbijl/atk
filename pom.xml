@@ -61,10 +61,10 @@
 			<id>dev-azure-com-jaspervdbijl-jaspervdbijl</id>
 			<url>https://pkgs.dev.azure.com/jaspervdbijl/_packaging/jaspervdbijl/maven/v1</url>
 		</snapshotRepository>
-        <repository>
-            <id>dev-azure-com-jaspervdbijl-jaspervdbijl</id>
-            <url>https://pkgs.dev.azure.com/jaspervdbijl/_packaging/jaspervdbijl/maven/v1</url>
-        </repository>
+		<repository>
+			<id>dev-azure-com-jaspervdbijl-jaspervdbijl</id>
+			<url>https://pkgs.dev.azure.com/jaspervdbijl/_packaging/jaspervdbijl/maven/v1</url>
+		</repository>
 	</distributionManagement>
 
 	<repositories>
