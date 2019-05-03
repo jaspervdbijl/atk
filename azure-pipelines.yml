@@ -12,10 +12,10 @@ pool:
 steps:
 - task: DownloadSecureFile@1
   inputs:
-    secureFile: settingsxml
+    secureFile: settings.xml
 
 - powershell: New-Item -Type Directory -Force "${HOME}/.m2"
-- powershell: Copy-Item -Force "$(settingsxml.secureFilePath)" "${HOME}/.m2/settings.xml"
+- powershell: Copy-Item -Force "$(Agent.TempDirectory)/settings.xml" "${HOME}/.m2/settings.xml"
   
 - task: Maven@3
   inputs:
