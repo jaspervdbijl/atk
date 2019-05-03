@@ -10,6 +10,13 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+- task: DownloadSecureFile@1
+  inputs:
+    secureFile: settings.xml
+
+- powershell: New-Item -Type Directory -Force "${HOME}/.m2"
+- powershell: Copy-Item -Force "$(Agent.TempDirectory)/settings.xml" "${HOME}/.m2/settings.xml"
+  
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
@@ -19,4 +26,4 @@ steps:
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'install'
+    goals: 'deploy'
