@@ -46,6 +46,7 @@ public class AtkField<T,R> {
         if (audit) {
             oldValue = (T) field.get(entity);
         }
+        // transform value if
         changed = !AtkUtil.equals(field.get(entity),value);
         set = true;
         field.set(entity,value);

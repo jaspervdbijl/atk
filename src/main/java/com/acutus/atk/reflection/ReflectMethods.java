@@ -101,6 +101,10 @@ public class ReflectMethods extends ArrayList<Method> {
         return Optional.ofNullable(!fields.isEmpty() ? fields.get(0) : null);
     }
 
+    public Optional<Method> getByName(String name) {
+        return getByName(name, false);
+    }
+
     public List<String> getNames() {
         List<String> names = new ArrayList<>();
         for (int i = 0; i < size(); i++) {

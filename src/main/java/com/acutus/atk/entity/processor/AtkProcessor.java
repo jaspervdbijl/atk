@@ -98,12 +98,14 @@ public class AtkProcessor extends AbstractProcessor {
     /**
      * expand to include other supported field types
      *
-     * @param type
+     * @param e
      * @return
      */
-    private boolean isPrimitive(String type) {
-        return type.startsWith("java.lang.") ||
-                type.startsWith("java.time.Local");
+    @SneakyThrows
+    public boolean isPrimitive(Element e) {
+        // determine if the type is a enum
+        return e.asType().toString().startsWith("java.lang.") ||
+                e.asType().toString().startsWith("java.time.Local");
     }
 
     protected Strings getElement(String className, Element element) {
@@ -120,7 +122,7 @@ public class AtkProcessor extends AbstractProcessor {
 
         // add all the fields
         element.getEnclosedElements().stream()
-                .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f.asType().toString()))
+                .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f))
                 .forEach(e -> {
                     entity.add(getField(e));
                     entity.add(getAtkField(element, e));
