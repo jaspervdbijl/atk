@@ -14,6 +14,7 @@ import javax.tools.JavaFileObject;
 import java.io.PrintWriter;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SupportedAnnotationTypes(
         "com.acutus.atk.entity.processor.Atk")
@@ -33,6 +34,16 @@ public class AtkProcessor extends AbstractProcessor {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, msg);
     }
 
+    public Stream<? extends Element> getFields(Element root) {
+        return root.getEnclosedElements().stream()
+                .filter(f -> ElementKind.FIELD.equals(f.getKind()));
+    }
+
+    public Strings getFieldNames(Element root) {
+        return getFields(root)
+                .map(f -> f.getSimpleName().toString())
+                .collect(Collectors.toCollection(Strings::new));
+    }
 
     @SneakyThrows
     @Override
@@ -121,21 +132,27 @@ public class AtkProcessor extends AbstractProcessor {
         entity.add(getMethods(className, element).append("\n").toString(""));
 
         // add all the fields
+        info("Enlosing " + element.getEnclosingElement().getSimpleName());
+        for (Element element1 : element.getEnclosingElement().getEnclosedElements()) {
+            info("root enclosed" + element1.getSimpleName());
+        }
+
         element.getEnclosedElements().stream()
                 .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f))
                 .forEach(e -> {
-                    entity.add(getField(e));
+                    entity.add(getField(element, e));
                     entity.add(getAtkField(element, e));
                     entity.add(getGetter(element, e));
                     entity.add(getSetter(element, e));
                 });
+
         entity.add("}");
 
         info(entity.toString("\n"));
         return entity;
     }
 
-    protected String getField(Element element) {
+    protected String getField(Element root, Element element) {
         String annotations =
                 (!element.getAnnotationMirrors().isEmpty() ?
                         (element.getAnnotationMirrors().stream()

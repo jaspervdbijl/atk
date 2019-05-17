@@ -2,9 +2,11 @@ package com.acutus.atk.util.collection;
 
 import com.acutus.atk.util.Assert;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@NoArgsConstructor
 @AllArgsConstructor
 public class Three<A, B, C> extends Collectable {
 

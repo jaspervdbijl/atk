@@ -2,9 +2,11 @@ package com.acutus.atk.util.collection;
 
 import com.acutus.atk.util.Assert;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@NoArgsConstructor
 @AllArgsConstructor
 public class Five<A, B, C, D, E> extends Collectable {
 
@@ -36,7 +38,7 @@ public class Five<A, B, C, D, E> extends Collectable {
 
     @Override
     public Collectable initFromList(List values) {
-        Assert.isTrue(values.size() > 3, "Values less then 5");
+        Assert.isTrue(values.size() > 4, "Values less then 5");
         this.a = (A) values.get(0);
         this.b = (B) values.get(1);
         this.c = (C) values.get(2);

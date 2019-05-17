@@ -52,5 +52,9 @@ public class AbstractAtk<T, O> {
         return initFrom(base, new AtkFieldList());
     }
 
+    public String toString() {
+        return getClass().getSimpleName() + "{\n\t" + getFields().toString() + "\n}";
+    }
+
 
 }
