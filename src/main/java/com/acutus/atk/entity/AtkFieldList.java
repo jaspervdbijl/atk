@@ -25,6 +25,11 @@ public class AtkFieldList<T extends AtkField> extends ArrayList<T> {
         return stream().filter(f -> f.isSet()).collect(Collectors.toCollection(AtkFieldList::new));
     }
 
+    public AtkFieldList<T> restoreSet() {
+        stream().filter(f -> f.get() != null).forEach(f -> f.setSet(true));
+        return this;
+    }
+
     public List<String> getNames() {
         return stream().map(f -> f.getField().getName()).collect(Collectors.toList());
     }

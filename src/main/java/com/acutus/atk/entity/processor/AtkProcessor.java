@@ -51,6 +51,7 @@ public class AtkProcessor extends AbstractProcessor {
                            RoundEnvironment roundEnv) {
 
         info("Started");
+        roundEnv.getRootElements().stream().forEach(r -> info("root type " + ((Element) r).getSimpleName()));
         for (TypeElement annotation : annotations) {
             roundEnv.getElementsAnnotatedWith(annotation).stream()
                     .forEach(e -> processElement(
@@ -85,13 +86,30 @@ public class AtkProcessor extends AbstractProcessor {
                 atk.className();
     }
 
-    protected String getClassNameLine(Element element) {
+    private String removeSection(String line, String remove) {
+        if (line.contains(remove)) {
+            int index = line.indexOf(remove);
+            String header = line.substring(0, index);
+            String trailer = line.substring(index + remove.length());
+            if (trailer.trim().startsWith("(")) {
+                trailer = trailer.substring(trailer.indexOf(")") + 1);
+            }
+            return header + trailer;
+        }
+        return line;
+    }
+
+    protected String getClassNameLine(Element element, String... removeStrings) {
         // copy all Annotations over except lombok
         String annotations = element.getAnnotationMirrors().stream()
                 .map(a -> a.toString()).collect(Collectors.joining(" "))
                 .replace("@lombok.NoArgsConstructor", "")
                 .replace("@lombok.AllArgsConstructor", "")
                 .replace("@lombok.Builder", "");
+        info("getClassNameLine = " + annotations);
+        for (String remove : removeStrings) {
+            annotations = removeSection(annotations, remove);
+        }
         // replace Atk annotation
         annotations = annotations.replace("@com.acutus.atk.entity.processor.Atk", "");
         return annotations + "\n" + String.format("public class %s extends AbstractAtk<%s,%s> {"
@@ -131,12 +149,6 @@ public class AtkProcessor extends AbstractProcessor {
         entity.add(getExtraFields(element).append(";\n").toString(""));
         entity.add(getMethods(className, element).append("\n").toString(""));
 
-        // add all the fields
-        info("Enlosing " + element.getEnclosingElement().getSimpleName());
-        for (Element element1 : element.getEnclosingElement().getEnclosedElements()) {
-            info("root enclosed" + element1.getSimpleName());
-        }
-
         element.getEnclosedElements().stream()
                 .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f))
                 .forEach(e -> {
@@ -148,7 +160,6 @@ public class AtkProcessor extends AbstractProcessor {
 
         entity.add("}");
 
-        info(entity.toString("\n"));
         return entity;
     }
 

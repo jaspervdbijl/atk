@@ -31,9 +31,9 @@ public class Strings extends ArrayList<String> {
                 .boxed().collect(Collectors.toList());
     }
 
-    public Optional<Integer> firstIndexesOfContains(String text) {
+    public OptionalInt firstIndexesOfContains(String text) {
         List<Integer> indexes = indexesOfContains(text);
-        return indexes.isEmpty()?Optional.empty():Optional.of(indexes.get(0));
+        return indexes.isEmpty() ? OptionalInt.empty() : OptionalInt.of(indexes.get(0));
     }
 
     public Strings replace(String oldV, String newV) {
