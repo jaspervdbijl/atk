@@ -30,6 +30,13 @@ public class AtkFieldList<T extends AtkField> extends ArrayList<T> {
         return this;
     }
 
+    public void initFrom(AtkFieldList fields) {
+        for (AtkField field : this) {
+            field.initFrom((AtkField) fields.getByName(field.getField().getName()).get());
+        }
+    }
+
+
     public List<String> getNames() {
         return stream().map(f -> f.getField().getName()).collect(Collectors.toList());
     }

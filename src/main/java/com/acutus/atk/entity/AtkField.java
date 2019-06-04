@@ -9,6 +9,9 @@ import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
 
+import static com.acutus.atk.beans.BeanHelper.decode;
+import static com.acutus.atk.beans.BeanHelper.encode;
+
 public class AtkField<T,R> {
 
     @Getter
@@ -53,6 +56,15 @@ public class AtkField<T,R> {
         return entity;
     }
 
+    public R deSerialize(String value) {
+        set((T) decode(getType(), value));
+        return entity;
+    }
+
+    public String serialize() {
+        return encode(get());
+    }
+
     public void reset() {
         changed = false;
         set = false;
@@ -66,6 +78,19 @@ public class AtkField<T,R> {
     public void revert() {
         Assert.isTrue(audit,"Can only revert when audit is enabled");
         set(oldValue);
+    }
+
+    /**
+     * copy value and state
+     *
+     * @param field
+     */
+    public void initFrom(AtkField field) {
+        set((T) field.get());
+        changed = field.changed;
+        set = field.set;
+        oldValue = (T) field.getOldValue();
+
     }
 
     public String toString() {

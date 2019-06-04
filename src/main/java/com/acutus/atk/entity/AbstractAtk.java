@@ -69,7 +69,7 @@ public class AbstractAtk<T extends AbstractAtk, O> {
     @SneakyThrows
     public T clone() {
         T clone = (T) getClass().getConstructor().newInstance();
-        getRefFields().copyMatchingTo(this, getRefFields(), clone);
+        clone.getFields().initFrom(getFields());
         return clone;
     }
 

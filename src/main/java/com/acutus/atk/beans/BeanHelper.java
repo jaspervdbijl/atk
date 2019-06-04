@@ -44,7 +44,7 @@ public class BeanHelper {
     }};
 
     @SneakyThrows
-    public <T> T decode(Class<T> type, String value) {
+    public static <T> T decode(Class<T> type, String value) {
         if (value == null) return null;
 
         CallOneRet<String, Object> call = DECODE_MAP.get(type);
@@ -53,11 +53,11 @@ public class BeanHelper {
     }
 
     @SneakyThrows
-    public <T> T encode(T value) {
+    public static String encode(Object value) {
         if (value == null) return null;
 
         CallOneRet<Object, String> call = ENCODE_MAP.get(value.getClass());
         Assert.isTrue(call != null, "Type not implemented", value.getClass().getName());
-        return (T) call.call(value);
+        return call.call(value);
     }
 }
