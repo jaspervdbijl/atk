@@ -14,6 +14,7 @@ import java.util.Map;
 public class BeanHelper {
 
     public static final Map<Class, CallOneRet<String, Object>> DECODE_MAP = new HashMap<Class, CallOneRet<String, Object>>() {{
+        put(String.class, s -> s);
         put(Integer.class, s -> Integer.parseInt(s));
         put(Long.class, s -> Long.parseLong(s));
         put(Boolean.class, s -> Boolean.parseBoolean(s));
@@ -29,6 +30,7 @@ public class BeanHelper {
     }};
 
     public static final Map<Class, CallOneRet<Object, String>> ENCODE_MAP = new HashMap<Class, CallOneRet<Object, String>>() {{
+        put(String.class, s -> s.toString());
         put(Integer.class, s -> s.toString());
         put(Long.class, s -> s.toString());
         put(Boolean.class, s -> s.toString());

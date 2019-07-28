@@ -1,5 +1,7 @@
 package com.acutus.atk.entity.processor;
 
+import com.acutus.atk.reflection.Reflect;
+import com.acutus.atk.reflection.ReflectFields;
 import com.acutus.atk.util.Strings;
 import com.google.auto.service.AutoService;
 import lombok.SneakyThrows;
@@ -9,9 +11,12 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,7 +56,6 @@ public class AtkProcessor extends AbstractProcessor {
                            RoundEnvironment roundEnv) {
 
         info("Started");
-        roundEnv.getRootElements().stream().forEach(r -> info("root type " + ((Element) r).getSimpleName()));
         for (TypeElement annotation : annotations) {
             roundEnv.getElementsAnnotatedWith(annotation).stream()
                     .forEach(e -> processElement(
@@ -61,11 +65,13 @@ public class AtkProcessor extends AbstractProcessor {
         return true;
     }
 
+    @SneakyThrows
     protected void processElement(String className, Element element) {
         String source = getElement(className, element)
                 .stream()
                 .reduce((s1, s2) -> s1 + "\n" + s2)
                 .get();
+
         writeFile(getClassName(element), source);
     }
 
@@ -157,10 +163,23 @@ public class AtkProcessor extends AbstractProcessor {
                     entity.add(getGetter(element, e));
                     entity.add(getSetter(element, e));
                 });
-
         entity.add("}");
 
         return entity;
+    }
+
+    @SneakyThrows
+    private String getSuperClass(Element parent,String superClassName) {
+        Strings superFields = new Strings();
+        for (Field field : Reflect.getFields(Class.forName(superClassName))) {
+            for (Annotation a : field.getAnnotations()) {
+                superFields.add(a.toString());
+            }
+            superFields.add(String.format("private %s %s;",field.getType().getName(),field.getName()));
+            superFields.add(getAtkField(parent,field));
+        }
+        info("super fields " + superFields);
+        return superFields.toString("\n");
     }
 
     protected String getField(Element root, Element element) {
@@ -182,6 +201,14 @@ public class AtkProcessor extends AbstractProcessor {
 
     protected Strings getExtraFields(Element parent) {
         return new Strings();
+    }
+
+    protected String getAtkField(Element parent, Field e) {
+        return String.format("public transient AtkField<%s,%s> _%s = new AtkField<>(%s,this);"
+                , e.getType().getName(), getClassName(parent), e.getName()
+                , String.format("Reflect.getFields(%s.class).getByName(\"%s\").get()"
+                        , getClassName(parent), e.getName())
+        );
     }
 
     protected String getAtkField(Element parent, Element e) {
