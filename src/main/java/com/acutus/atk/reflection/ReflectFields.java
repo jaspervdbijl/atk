@@ -110,7 +110,7 @@ public class ReflectFields extends ArrayList<Field> {
         stream().filter(f ->
                 dstFields.getByName(f.getName()).isPresent()
                         && f.getType().equals(dstFields.getByName(f.getName()).get().getType()) &&
-                        !exclude.getByName(f.getName()).isPresent()
+                        exclude != null && !exclude.getByName(f.getName()).isPresent()
         )
                 .forEach(f -> handle(() -> dstFields.getByName(f.getName()).get().set(destination, f.get(source))));
         return this;

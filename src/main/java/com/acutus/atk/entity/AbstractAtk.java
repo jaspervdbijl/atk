@@ -17,7 +17,7 @@ public class AbstractAtk<T extends AbstractAtk, O> {
     public List<Class> getPathToRoot(List<Class> sources, Class source) {
         if (!source.equals(Object.class)) {
             sources.add(source);
-            getPathToRoot(sources,source.getSuperclass());
+            getPathToRoot(sources, source.getSuperclass());
         }
         return sources;
     }
@@ -49,7 +49,8 @@ public class AbstractAtk<T extends AbstractAtk, O> {
     }
 
     public T initFrom(O base, AtkFieldList exclude) {
-        Reflect.getFields(base.getClass()).copyMatchingTo(base, getRefFields(), this, exclude.toRefFields());
+        Reflect.getFields(base.getClass()).
+                copyMatchingTo(base, getRefFields(), this, exclude != null ? exclude.toRefFields() : null);
         restoreSet();
         return (T) this;
     }
