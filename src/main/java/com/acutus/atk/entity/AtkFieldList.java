@@ -51,9 +51,7 @@ public class AtkFieldList<T extends AtkField> extends ArrayList<T> {
     }
 
     public ReflectFields toRefFields() {
-        return new ReflectFields(stream()
-                .map(f -> f.getField())
-                .collect(Collectors.toList()));
+        return stream().map(f -> f.getField()).collect(Collectors.toCollection(ReflectFields::new));
     }
 
     public AtkFieldList addField(T field) {
