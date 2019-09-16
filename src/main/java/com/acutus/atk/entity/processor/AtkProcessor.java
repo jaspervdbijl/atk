@@ -171,7 +171,7 @@ public class AtkProcessor extends AbstractProcessor {
     @SneakyThrows
     private String getSuperClass(Element parent,String superClassName) {
         Strings superFields = new Strings();
-        for (Field field : Reflect.getFields(Class.forName(superClassName))) {
+        for (Field field : Reflect.getFields(Class.forName(superClassName)).values()) {
             for (Annotation a : field.getAnnotations()) {
                 superFields.add(a.toString());
             }

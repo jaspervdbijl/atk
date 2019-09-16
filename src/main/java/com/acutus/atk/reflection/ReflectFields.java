@@ -1,27 +1,24 @@
 package com.acutus.atk.reflection;
 
+import com.acutus.atk.util.Assert;
 import com.acutus.atk.util.Strings;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static com.acutus.atk.util.AtkUtil.handle;
 
 /**
  * Created by jaspervdb on 2016/06/08.
  */
-public class ReflectFields extends ArrayList<Field> {
+public class ReflectFields extends HashMap<String,Field> {
 
     public ReflectFields() {
     }
 
     public ReflectFields(Collection<Field> fields) {
-        super.addAll(fields);
+        fields.stream().forEach(f -> put(f.getName(),f));
     }
 
     public ReflectFields(Class type) {
@@ -35,37 +32,46 @@ public class ReflectFields extends ArrayList<Field> {
         for (Field field : type.getDeclaredFields()) {
             if (!Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
                 field.setAccessible(true);
-                add(field);
+                put(field.getName(),field);
             }
         }
     }
 
     public Strings getNames() {
-        return stream().map(f -> f.getName()).collect(Collectors.toCollection(Strings::new));
+        return new Strings(keySet());
     }
 
     public Optional<Field> get(String name) {
-        return stream().filter(f -> f.getName().equals(name)).findFirst();
+        return Optional.ofNullable(super.get(name));
     }
 
     public ReflectFields remove(String name) {
-        remove(get(name));
+        super.remove(name);
         return this;
     }
 
     public ReflectFields getByNames(Strings names) {
-        return stream().filter(f -> names.contains(f.getName()))
-                .collect(Collectors.toCollection(ReflectFields::new));
+        ReflectFields fields = new ReflectFields();
+        names.stream().forEach(n -> fields.put(n,get(n).get()));
+        return fields;
     }
 
     public Optional<Field> getByName(String name) {
-        ReflectFields fields = getByNames(Strings.asList(name));
-        return Optional.ofNullable(!fields.isEmpty() ? fields.get(0) : null);
+        return Optional.ofNullable(get(name) != null? get(name).get(): null);
+    }
+
+    /**
+     * assert that the field name is uniqie
+     * @param field
+     */
+    public void add(Field field) {
+        Assert.isTrue(get(field.getName()) == null,"Field %s has already been added in set",field.getName());
+        put(field.getName(),field);
     }
 
     public ReflectFields filterType(Class filterClass, boolean inverse) {
         ReflectFields fields = new ReflectFields();
-        for (Field field : this) {
+        for (Field field : values()) {
             if (inverse != filterClass.isAssignableFrom(field.getType())) {
                 fields.add(field);
             }
@@ -80,7 +86,7 @@ public class ReflectFields extends ArrayList<Field> {
     public ReflectFields getNonNull(Object ref) {
         try {
             ReflectFields fields = new ReflectFields();
-            for (Field field : this) {
+            for (Field field : values()) {
                 if (field.get(ref) != null) {
                     fields.add(field);
                 }
@@ -94,7 +100,7 @@ public class ReflectFields extends ArrayList<Field> {
     public <T> List<T> getInstances(Class<T> type, Object source) {
         try {
             List<T> instances = new ArrayList<>();
-            for (Field field : filterType(type)) {
+            for (Field field : filterType(type).values()) {
                 instances.add((T) field.get(source));
             }
             return instances;
@@ -107,7 +113,7 @@ public class ReflectFields extends ArrayList<Field> {
      * copy matching field by name and type
      */
     public ReflectFields copyMatchingTo(Object source, ReflectFields dstFields, Object destination, ReflectFields exclude) {
-        stream().filter(f ->
+        values().stream().filter(f ->
                 dstFields.getByName(f.getName()).isPresent()
                         && f.getType().equals(dstFields.getByName(f.getName()).get().getType()) &&
                         !exclude.getByName(f.getName()).isPresent()

@@ -29,6 +29,7 @@ public class AbstractAtk<T extends AbstractAtk, O> {
     public <T extends AtkFieldList> T getFields() {
         return (T) getRefFields()
                 .filterType(AtkField.class)
+                .values()
                 .stream()
                 .map(f -> (AtkField) handle(() -> f.get(this)))
                 .collect(Collectors.toCollection(AtkFieldList::new));
