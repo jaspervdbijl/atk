@@ -5,7 +5,7 @@
 
 	<groupId>com.acutus</groupId>
 	<artifactId>atk</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>atk</name>
@@ -56,29 +56,29 @@
 		</extensions>
 	</build>
 
-	<distributionManagement>
-		<snapshotRepository>
-			<id>dev-azure-com-jaspervdbijl-jaspervdbijl</id>
-			<url>https://pkgs.dev.azure.com/jaspervdbijl/_packaging/jaspervdbijl/maven/v1</url>
-		</snapshotRepository>
-		<repository>
-			<id>dev-azure-com-jaspervdbijl-jaspervdbijl</id>
-			<url>https://pkgs.dev.azure.com/jaspervdbijl/_packaging/jaspervdbijl/maven/v1</url>
-		</repository>
-	</distributionManagement>
+<!--	<distributionManagement>-->
+<!--		<snapshotRepository>-->
+<!--			<id>dev-azure-com-jaspervdbijl-jaspervdbijl</id>-->
+<!--			<url>https://pkgs.dev.azure.com/jaspervdbijl/_packaging/jaspervdbijl/maven/v1</url>-->
+<!--		</snapshotRepository>-->
+<!--		<repository>-->
+<!--			<id>dev-azure-com-jaspervdbijl-jaspervdbijl</id>-->
+<!--			<url>https://pkgs.dev.azure.com/jaspervdbijl/_packaging/jaspervdbijl/maven/v1</url>-->
+<!--		</repository>-->
+<!--	</distributionManagement>-->
 
-	<repositories>
-		<repository>
-			<id>dev-azure-com-jaspervdbijl-jaspervdbijl</id>
-			<url>https://pkgs.dev.azure.com/jaspervdbijl/_packaging/jaspervdbijl/maven/v1</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
+<!--	<repositories>-->
+<!--		<repository>-->
+<!--			<id>dev-azure-com-jaspervdbijl-jaspervdbijl</id>-->
+<!--			<url>https://pkgs.dev.azure.com/jaspervdbijl/_packaging/jaspervdbijl/maven/v1</url>-->
+<!--			<releases>-->
+<!--				<enabled>true</enabled>-->
+<!--			</releases>-->
+<!--			<snapshots>-->
+<!--				<enabled>true</enabled>-->
+<!--			</snapshots>-->
+<!--		</repository>-->
+<!--	</repositories>-->
 
 
 </project>
