@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 public class AtkFieldList<T extends AtkField> extends ArrayList<T> {
 
+    // keep a static class name index
     public AtkFieldList() {
     }
 
