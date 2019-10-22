@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.acutus.atk.util.AtkUtil.handle;
@@ -75,6 +76,16 @@ public class ReflectFields extends ArrayList<Field> {
 
     public ReflectFields filterType(Class filterClass) {
         return filterType(filterClass, false);
+    }
+
+    public ReflectFields filterAnnotation(Class ano) {
+        return stream().filter(f -> f.getAnnotation(ano) != null)
+                .collect(Collectors.toCollection(ReflectFields::new));
+    }
+
+    public ReflectFields filter(Predicate<Field> predicate) {
+        return stream().filter(predicate)
+                .collect(Collectors.toCollection(ReflectFields::new));
     }
 
     public ReflectFields getNonNull(Object ref) {

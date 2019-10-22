@@ -41,6 +41,11 @@ public class Strings extends ArrayList<String> {
                 .collect(Collectors.toCollection(Strings::new));
     }
 
+    public boolean equalsIgnoreOrderIgnoreCase(Strings values) {
+        return values.size() == size() && !stream().filter(s -> !values.containsIgnoreCase(s)).findAny().isPresent();
+    }
+
+
     @Override
     public Strings clone() {
         return new Strings(this);

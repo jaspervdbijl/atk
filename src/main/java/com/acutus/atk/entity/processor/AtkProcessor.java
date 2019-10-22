@@ -4,6 +4,7 @@ import com.acutus.atk.reflection.Reflect;
 import com.acutus.atk.reflection.ReflectFields;
 import com.acutus.atk.util.Strings;
 import com.google.auto.service.AutoService;
+import lombok.Getter;
 import lombok.SneakyThrows;
 
 import javax.annotation.processing.*;
@@ -148,9 +149,9 @@ public class AtkProcessor extends AbstractProcessor {
 
         Strings entity = new DebugStrings();
 
-        entity.add(getPackage(className, element) + ";");
+        entity.add(getPackage(className, element) + ";\n\n");
         entity.add(getImports().append(";\n").toString(""));
-        entity.add(getClassNameLine(element));
+        entity.add(getClassNameLine(element)+"\n");
         entity.add(getConstructors(element).append("\n").toString(""));
         entity.add(getExtraFields(element).append(";\n").toString(""));
         entity.add(getMethods(className, element).append("\n").toString(""));
@@ -158,10 +159,10 @@ public class AtkProcessor extends AbstractProcessor {
         element.getEnclosedElements().stream()
                 .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f))
                 .forEach(e -> {
-                    entity.add(getField(element, e));
-                    entity.add(getAtkField(element, e));
-                    entity.add(getGetter(element, e));
-                    entity.add(getSetter(element, e));
+                    entity.add("\t"+getField(element, e)+"\n");
+                    entity.add("\t"+getAtkField(element, e)+"\n");
+                    entity.add("\t"+getGetter(element, e)+"\n");
+                    entity.add("\t"+getSetter(element, e)+"\n");
                 });
         entity.add("}");
 
@@ -196,7 +197,7 @@ public class AtkProcessor extends AbstractProcessor {
                         .reduce((s1, s2) -> s1 + " " + s2).get()
                         : "");
         return String.format("%s %s %s %s;", annotations, modifiers
-                , element.asType().toString(), element.getSimpleName());
+                , element.asType().toString(), element.getSimpleName()).replace("\n","\n\t");
     }
 
     protected Strings getExtraFields(Element parent) {
