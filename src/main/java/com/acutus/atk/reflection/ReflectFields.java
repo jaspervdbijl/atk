@@ -74,6 +74,7 @@ public class ReflectFields extends ArrayList<Field> {
         return fields;
     }
 
+
     public ReflectFields filterType(Class filterClass) {
         return filterType(filterClass, false);
     }
