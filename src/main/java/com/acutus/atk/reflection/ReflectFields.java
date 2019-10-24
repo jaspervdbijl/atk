@@ -80,8 +80,8 @@ public class ReflectFields extends ArrayList<Field> {
     }
 
     public ReflectFields filterAnnotation(Class ano) {
-        return stream().filter(f -> f.getAnnotation(ano) != null)
-                .collect(Collectors.toCollection(ReflectFields::new));
+        return new ReflectFields((Collection<Field>) stream().filter(f -> f.getAnnotation(ano) != null)
+                .collect(Collectors.toList()));
     }
 
     public ReflectFields filter(Predicate<Field> predicate) {
