@@ -26,7 +26,7 @@ public class AtkField<T,R> {
     private com.acutus.atk.entity.processor.AtkField atkField;
 
     @Getter @Setter
-    private boolean audit,changed,set;
+    private boolean audit,changed,set,ignore;
 
     public AtkField(Field field, R entity) {
         this.field = field;
@@ -68,6 +68,7 @@ public class AtkField<T,R> {
     public void reset() {
         changed = false;
         set = false;
+        ignore = false;
     }
 
     @SneakyThrows
@@ -78,6 +79,20 @@ public class AtkField<T,R> {
     public void revert() {
         Assert.isTrue(audit,"Can only revert when audit is enabled");
         set(oldValue);
+    }
+
+    /**
+     * you can choose to temporarily exclude (ignore) fields requests
+     * for example if a field represents a big data blob, you want to exclude it from certain queries
+     * @return
+     */
+    public R ignore(boolean ignore) {
+        this.ignore = ignore;
+        return entity;
+    }
+
+    public R ignore() {
+        return ignore(true);
     }
 
     /**
