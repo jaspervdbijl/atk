@@ -21,6 +21,11 @@ public class Strings extends ArrayList<String> {
         return new Strings(Arrays.asList(strings));
     }
 
+    public int indexOfIgnoreCase(String value) {
+        Optional<Integer> index = IntStream.range(0,size()).filter(i -> value.toUpperCase().equals(get(i).toUpperCase()))
+                .boxed().findFirst();
+        return index.isPresent() ? index.get() : -1;
+    }
     /**
      * return all the indexes of strings that contains the text
      * @param text
