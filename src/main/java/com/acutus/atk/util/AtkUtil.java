@@ -4,6 +4,7 @@ import com.acutus.atk.util.call.CallNil;
 import com.acutus.atk.util.call.CallNilRet;
 import lombok.SneakyThrows;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 
 public class AtkUtil {
@@ -18,7 +19,7 @@ public class AtkUtil {
         return call.call();
     }
 
-    public static boolean equals(Object o1,Object o2) {
+    public static boolean equals(Object o1, Object o2) {
         return o1 == null && o2 == null || o1 != null && o1.equals(o2);
     }
 
@@ -35,6 +36,10 @@ public class AtkUtil {
 
     public static Class getGenericType(Class clazz) {
         return getGenericType(clazz, 0);
+    }
+
+    public static Class getGenericFieldType(Field field) {
+        return (Class) ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0];
     }
 
     /**
