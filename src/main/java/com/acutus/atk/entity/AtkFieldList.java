@@ -1,6 +1,7 @@
 package com.acutus.atk.entity;
 
 import com.acutus.atk.reflection.ReflectFields;
+import com.acutus.atk.util.Strings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,8 +44,8 @@ public class AtkFieldList<T extends AtkField> extends ArrayList<T> {
     }
 
 
-    public List<String> getNames() {
-        return stream().map(f -> f.getField().getName()).collect(Collectors.toList());
+    public Strings getNames() {
+        return stream().map(f -> f.getField().getName()).collect(Collectors.toCollection(Strings::new));
     }
 
     public String toString() {

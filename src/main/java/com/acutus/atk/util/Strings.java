@@ -50,6 +50,9 @@ public class Strings extends ArrayList<String> {
         return values.size() == size() && !stream().filter(s -> !values.containsIgnoreCase(s)).findAny().isPresent();
     }
 
+    public boolean equalsIgnoreOrder(Strings values) {
+        return values.size() == size() && !stream().filter(s -> !values.contains(s)).findAny().isPresent();
+    }
 
     @Override
     public Strings clone() {

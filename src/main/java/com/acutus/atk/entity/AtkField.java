@@ -108,6 +108,12 @@ public class AtkField<T,R> {
 
     }
 
+    public boolean isEqual(AtkField field) {
+        return getField().getName().equals(field.getField().getName()) &&
+                (get() == null && field.get() == null ||
+                get().equals(field.get()));
+    }
+
     public String toString() {
         return String.format("%s: %s",getField().getName(),""+get());
     }
