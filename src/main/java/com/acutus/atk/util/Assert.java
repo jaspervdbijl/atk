@@ -2,7 +2,7 @@ package com.acutus.atk.util;
 
 import com.acutus.atk.util.call.CallNilRet;
 import lombok.SneakyThrows;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -13,7 +13,7 @@ import java.util.logging.Level;
 /**
  * Created by jaspervdb on 2/24/16.
  */
-@Log
+@Slf4j
 public class Assert {
 
     public static void isTrue(Class<? extends RuntimeException > exClass, boolean value, String msg, Object... params) {
