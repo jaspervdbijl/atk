@@ -153,6 +153,7 @@ public class AtkProcessor extends AbstractProcessor {
         entity.add(getImports().append(";\n").toString(""));
         entity.add(getClassNameLine(element)+"\n");
         entity.add(getConstructors(element).append("\n").toString(""));
+        entity.add(getStaticFields(element).append(";\n").toString(""));
         entity.add(getExtraFields(element).append(";\n").toString(""));
         entity.add(getMethods(className, element).append("\n").toString(""));
 
@@ -198,6 +199,15 @@ public class AtkProcessor extends AbstractProcessor {
                         : "");
         return String.format("%s %s %s %s;", annotations, modifiers
                 , element.asType().toString(), element.getSimpleName()).replace("\n","\n\t");
+    }
+
+    protected Strings getStaticFields(Element parent) {
+        return parent.getEnclosedElements().stream()
+                .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f))
+                .map(e -> String.format("\tpublic static final Field FIELD_%s = " +
+                                        "Reflect.getFields(%s.class).getByName(\"_%s\").get()"
+                        ,e.getSimpleName().toString().toUpperCase(),getClassName(parent),e.getSimpleName()))
+                .collect(Collectors.toCollection(Strings::new));
     }
 
     protected Strings getExtraFields(Element parent) {

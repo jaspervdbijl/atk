@@ -4,6 +4,8 @@ import com.acutus.atk.util.call.CallNil;
 import com.acutus.atk.util.call.CallNilRet;
 import lombok.SneakyThrows;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 
@@ -56,6 +58,13 @@ public class AtkUtil {
     public static boolean isPrimitive(Class type) {
         return isPrimitive(type.getName());
     }
+
+    public static String convertStackTraceToString(Throwable e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
+    }
+
 
 
 }
