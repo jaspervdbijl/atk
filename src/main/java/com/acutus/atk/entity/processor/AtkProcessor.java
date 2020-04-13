@@ -179,11 +179,6 @@ public class AtkProcessor extends AbstractProcessor {
         return new Two<>(getDaoClass(atk.toString()),atk.daoMatch());
     }
 
-    protected Two<Class, Atk.Match> getDaoClass(Class clazz) {
-        Atk atk = (Atk) clazz.getAnnotation(Atk.class);
-        return atk != null ? new Two<>(getDaoClass(atk.toString()),atk.daoMatch()) : null;
-    }
-
     protected String getDaoGetterAndSetter(Element element,String cName,Field field,boolean getter) {
         // get
         Alternate alternate = field.getAnnotation(Alternate.class);
@@ -212,6 +207,7 @@ public class AtkProcessor extends AbstractProcessor {
     protected Strings getDaoGetterAndSetter(Element element, boolean getter) {
         Two<Class, Atk.Match> atk= getDaoClass(element);
         if (!Void.class.equals(atk.getFirst())) {
+            info("adding dao getter and setter for "+ atk.getFirst());
             assertDaoFields(new Two<>(atk.getFirst(),atk.getSecond()), element);
             Strings values = new Strings();
             String cName = atk.getFirst().getName();
@@ -236,7 +232,7 @@ public class AtkProcessor extends AbstractProcessor {
             IntStream.range(1,values.size()-1).forEach(i -> values.set(i,"\t"+values.get(i)));
             return values.prepend("\t");
         } else {
-            return new Strings();
+            return Strings.asList("// disabled " + atk.getFirst() + " second " + atk.getSecond());
         }
     }
 
