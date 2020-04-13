@@ -146,5 +146,10 @@ public class Strings extends ArrayList<String> {
                 .collect(Collectors.toCollection(Strings::new));
     }
 
+    public Strings intersection(Strings values) {
+        return stream().filter(s -> values.containsInside(s))
+                .collect(Collectors.toCollection(Strings::new));
+    }
+
 
 }
