@@ -17,7 +17,7 @@ public @interface Atk {
 
     String classNameExt() default "Entity";
 
-    Class dao() default Void.class;
+    Class daoClass() default Void.class;
     Atk.Match daoMatch() default Atk.Match.FULL;
 
 }

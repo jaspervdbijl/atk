@@ -46,6 +46,11 @@ public class Strings extends ArrayList<String> {
                 .collect(Collectors.toCollection(Strings::new));
     }
 
+    public Strings replace(CallOneRet<String,String> call) {
+        return stream().map(s -> handle(() -> call.call(s))).collect(Collectors.toCollection(Strings::new));
+
+    }
+
     public boolean equalsIgnoreOrderIgnoreCase(Strings values) {
         return values.size() == size() && !stream().filter(s -> !values.containsIgnoreCase(s)).findAny().isPresent();
     }
