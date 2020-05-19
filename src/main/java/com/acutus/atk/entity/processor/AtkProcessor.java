@@ -293,7 +293,8 @@ public class AtkProcessor extends AbstractProcessor {
         entity.add(getDaoGetterAndSetter(element, true).append("\n").toString(""));
 
         element.getEnclosedElements().stream()
-                .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f))
+                .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f) &&
+                        !shouldExcludeField(element,f.getSimpleName().toString()))
                 .forEach(e -> {
                     entity.add("\t" + getField(element, e) + "\n");
                     entity.add("\t" + getAtkField(element, e) + "\n");
@@ -346,6 +347,16 @@ public class AtkProcessor extends AbstractProcessor {
 
     protected Strings getExtraFields(Element parent) {
         return new Strings();
+    }
+
+    /**
+     * exclude fields if its added somewhere else
+     * @param element
+     * @param name
+     * @return
+     */
+    protected boolean shouldExcludeField(Element element, String name) {
+        return false;
     }
 
     protected String getAtkField(Element parent, Field e) {
