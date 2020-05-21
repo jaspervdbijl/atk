@@ -6,6 +6,11 @@ public class StringUtils {
         return value == null || value.trim().isEmpty();
     }
 
+    public static String notEmpty(String value1,String value2) {
+        return !isEmpty(value1) ? value1 : value2;
+    }
+
+
     /**
      * recursively replace
      *
