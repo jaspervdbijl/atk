@@ -169,6 +169,14 @@ public class AtkProcessor extends AbstractProcessor {
         return alternate != null && !Strings.asList(alternate.value()).intersection(names).isEmpty();
     }
 
+    protected boolean isStringEnum(Element field) {
+        return field.getAnnotationMirrors().toString().contains("javax.persistence.EnumType.STRING");
+    }
+
+    protected boolean isString(Element field) {
+        return field.asType().toString().equals("java.lang.String");
+    }
+
     private void assertDaoFields(Element element,Element classRoot,Atk.Match match ) {
         List<? extends Element> fields = getPrimitiveFields(classRoot).collect(Collectors.toList());
 
@@ -186,8 +194,10 @@ public class AtkProcessor extends AbstractProcessor {
         // check for type mismatches
         for (Element field : fields) {
             getFields(element).filter(f -> f.getSimpleName().equals(field.getSimpleName())).findAny().ifPresent(f -> {
-                if (!field.asType().toString().equals(f.asType().toString())) {
-                    error("Dao Getter mismatch. Type mismatch  " + f.getSimpleName());
+                boolean enumMatch = isStringEnum(field) && !isStringEnum(f)  && isString(f) ||
+                        isStringEnum(f) && !isStringEnum(field)  && isString(field);
+                if (!field.asType().toString().equals(f.asType().toString()) && !enumMatch) {
+                    error("Dao Getter mismatch. Type mismatch  " + f.getSimpleName() + " " + isStringEnum(field) + " " + isStringEnum(f));
                 }
             });
         }
@@ -219,7 +229,9 @@ public class AtkProcessor extends AbstractProcessor {
                 : alternateNames.get(0);
         // check types
         Element myField = getFields(element).filter(f -> f.getSimpleName().toString().equals(fName)).findFirst().get();
-        if (myField.getAnnotationMirrors().toString().contains("javax.persistence.EnumType.STRING") && String.class.equals(field.asType().toString())) {
+        boolean myFieldSsEnum = isStringEnum(myField);
+        boolean daoFieldSsEnum = isStringEnum(field);
+        if (myFieldSsEnum && !daoFieldSsEnum && field.asType().toString().equals("java.lang.String")) {
             String fn = field.getSimpleName().toString().substring(0, 1).toUpperCase() + field.getSimpleName().toString().substring(1);
             return getter
                     ? String.format("%s.set%s(_%s.get() != null ? _%s.get().name() : null);", cName, fn, fName, fName)
@@ -336,12 +348,16 @@ public class AtkProcessor extends AbstractProcessor {
                 , element.asType().toString(), element.getSimpleName()).replace("\n", "\n\t");
     }
 
+    protected String getStaticField(Element parent,String fieldName) {
+        return String.format("\tpublic static final Field FIELD_%s = Reflect.getFields(%s.class).getByName(\"_%s\").get()"
+                , fieldName.toUpperCase(), getClassName(parent), fieldName);
+    }
+
     protected Strings getStaticFields(Element parent) {
         return parent.getEnclosedElements().stream()
                 .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f))
-                .map(e -> String.format("\tpublic static final Field FIELD_%s = " +
-                                "Reflect.getFields(%s.class).getByName(\"_%s\").get()"
-                        , e.getSimpleName().toString().toUpperCase(), getClassName(parent), e.getSimpleName()))
+                .map(e -> getStaticField(parent,e.getSimpleName().toString()))
+                .distinct()
                 .collect(Collectors.toCollection(Strings::new));
     }
 
