@@ -14,6 +14,9 @@ public class StringUtils {
         return !isEmpty(value1) ? value1 : value2;
     }
 
+    public static String nonNullStr(Object value) {
+        return value != null ? value.toString() : "";
+    }
 
     /**
      * recursively replace

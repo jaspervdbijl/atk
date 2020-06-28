@@ -65,6 +65,10 @@ public class AtkUtil {
         return sw.toString();
     }
 
+    public static boolean nonNull(Boolean value) {
+        return value != null ? value : false;
+    }
+
 
 
 }
