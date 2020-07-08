@@ -33,7 +33,7 @@ import static com.acutus.atk.util.AtkUtil.getGenericType;
 
 @SupportedAnnotationTypes(
         "com.acutus.atk.entity.processor.Atk")
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_11)
 @AutoService(Processor.class)
 public class AtkProcessor extends AbstractProcessor {
 
