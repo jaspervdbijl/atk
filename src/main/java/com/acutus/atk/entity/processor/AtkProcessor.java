@@ -43,6 +43,7 @@ public class AtkProcessor extends AbstractProcessor {
 
     protected void error(String msg) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, msg);
+        throw new RuntimeException(msg);
     }
 
     protected void info(String msg) {
