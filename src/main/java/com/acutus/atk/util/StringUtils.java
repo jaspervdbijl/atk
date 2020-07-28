@@ -1,5 +1,6 @@
 package com.acutus.atk.util;
 
+import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -16,6 +17,10 @@ public class StringUtils {
 
     public static String nonNullStr(Object value) {
         return value != null ? value.toString() : "";
+    }
+
+    public static String defaultString(String value) {
+        return isEmpty(value) ? "" : value;
     }
 
     /**
