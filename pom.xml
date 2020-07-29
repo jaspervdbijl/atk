@@ -54,13 +54,13 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<extensions>
-			<extension>
-				<groupId>com.gkatzioura.maven.cloud</groupId>
-				<artifactId>azure-storage-wagon</artifactId>
-				<version>1.0</version>
-			</extension>
-		</extensions>
+<!--		<extensions>-->
+<!--			<extension>-->
+<!--				<groupId>com.gkatzioura.maven.cloud</groupId>-->
+<!--				<artifactId>azure-storage-wagon</artifactId>-->
+<!--				<version>1.0</version>-->
+<!--			</extension>-->
+<!--		</extensions>-->
 	</build>
 
 <!--	<distributionManagement>-->
