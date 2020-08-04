@@ -63,5 +63,9 @@ public class StringUtils {
         return string.substring(start,indexOf(string, value, position));
     }
 
+    public static String subLength(String string, int length) {
+        return string.length() > length ? string.substring(0,length) : string;
+    }
+
 
 }
