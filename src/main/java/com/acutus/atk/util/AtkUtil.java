@@ -9,6 +9,8 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 
+import static com.acutus.atk.util.StringUtils.subLength;
+
 public class AtkUtil {
 
     @SneakyThrows
@@ -63,6 +65,10 @@ public class AtkUtil {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         return sw.toString();
+    }
+
+    public static String convertStackTraceToString(Throwable e,int length) {
+        return subLength(convertStackTraceToString(e),length);
     }
 
     public static boolean nonNull(Boolean value) {
