@@ -429,7 +429,7 @@ public class AtkProcessor extends AbstractProcessor {
 
         @Override
         public boolean add(String s) {
-            info(s);
+//            info(s);
             return super.add(s);
         }
     }
