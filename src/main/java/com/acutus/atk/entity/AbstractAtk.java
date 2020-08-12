@@ -49,9 +49,11 @@ public class AbstractAtk<T extends AbstractAtk, O> {
     }
 
     public T initFrom(O base, AtkFieldList exclude) {
-        Reflect.getFields(base.getClass()).
-                copyMatchingTo(base, getRefFields(), this, exclude != null ? exclude.toRefFields() : null);
-        restoreSet();
+        ReflectFields bFields = Reflect.getFields(base.getClass());
+        bFields.copyMatchingTo(base, getRefFields(), this, exclude != null ? exclude.toRefFields() : null);
+        // update set state
+        bFields.stream().forEach(f -> handle(() ->
+            getFields().getByName(f.getName()).ifPresent(myField -> ((AtkField)myField).setSet(true))));
         return (T) this;
     }
 
@@ -74,15 +76,6 @@ public class AbstractAtk<T extends AbstractAtk, O> {
         return clone;
     }
 
-    /**
-     * this will restore the set state of all the fields with values
-     *
-     * @return
-     */
-    public T restoreSet() {
-        getFields().restoreSet();
-        return (T) this;
-    }
 
 
 }
