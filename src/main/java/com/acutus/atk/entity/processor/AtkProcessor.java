@@ -1,8 +1,6 @@
 package com.acutus.atk.entity.processor;
 
 import com.acutus.atk.reflection.Reflect;
-import com.acutus.atk.util.Assert;
-import com.acutus.atk.util.AtkUtil;
 import com.acutus.atk.util.Strings;
 import com.acutus.atk.util.collection.Two;
 import com.google.auto.service.AutoService;
@@ -12,24 +10,19 @@ import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import static com.acutus.atk.util.AtkUtil.convertStackTraceToString;
-import static com.acutus.atk.util.AtkUtil.getGenericType;
 
 @SupportedAnnotationTypes(
         "com.acutus.atk.entity.processor.Atk")
@@ -85,8 +78,8 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     @SneakyThrows
-    protected void processElement(RoundEnvironment roundEnv,String className, Element element) {
-        String source = getElement(roundEnv,className, element)
+    protected void processElement(RoundEnvironment roundEnv, String className, Element element) {
+        String source = getElement(roundEnv, className, element)
                 .stream()
                 .reduce((s1, s2) -> s1 + "\n" + s2)
                 .get();
@@ -95,7 +88,7 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected Strings getImports(Element element) {
-        Strings imports =  Strings.asList("import com.acutus.atk.entity.*", "import static com.acutus.atk.util.AtkUtil.handle"
+        Strings imports = Strings.asList("import com.acutus.atk.entity.*", "import static com.acutus.atk.util.AtkUtil.handle"
                 , "import java.util.stream.Collectors", "import java.lang.reflect.Field"
                 , "import com.acutus.atk.reflection.Reflect");
         // append all the DAO classes
@@ -121,16 +114,32 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected Element getClassElement(String className) {
-        // find by package
+        for (Element element : getPackageElement(className).getEnclosedElements()) {
+            if (className.endsWith(element.getSimpleName().toString())) {
+                return element;
+            }
 
-        String packageName = className.substring(0, className.lastIndexOf("."));
-        Optional<? extends Element> classE =
-                processingEnv.getElementUtils().getPackageElement(packageName)
-                        .getEnclosedElements().stream().filter(e -> className.endsWith(e.getSimpleName().toString())).findAny();
-        Assert.isTrue(classE.isPresent(), "Could not locate element by classname " + className);
-        return classE.get();
+            for (Element innerElements : element.getEnclosedElements()) {
+                if (className.endsWith(innerElements.getSimpleName().toString())) {
+                    return innerElements;
+                }
+            }
+        }
+
+        throw new RuntimeException("Could not locate element by classname " + className);
     }
 
+    private PackageElement getPackageElement(String className) {
+        PackageElement packageElement;
+        String packageName = className.substring(0, className.lastIndexOf("."));
+        do {
+            packageElement = processingEnv.getElementUtils().getPackageElement(packageName);
+            packageName = packageName.substring(0, packageName.lastIndexOf("."));
+
+        } while (packageElement == null);
+
+        return packageElement;
+    }
 
     private String removeSection(String line, String remove) {
         if (line.contains(remove)) {
@@ -178,16 +187,16 @@ public class AtkProcessor extends AbstractProcessor {
         return field.asType().toString().equals("java.lang.String");
     }
 
-    private void assertDaoFields(Element element,Element classRoot,Atk.Match match ) {
+    private void assertDaoFields(Element element, Element classRoot, Atk.Match match) {
         List<? extends Element> fields = getPrimitiveFields(classRoot).collect(Collectors.toList());
 
         // check for mismatches
         if (match.equals(Atk.Match.FULL)) {
 
             Optional<? extends Element> notFound = fields.stream().filter(f ->
-                            !getFieldNames(element).containsIgnoreCase(f.getSimpleName().toString()) &&
-                                    containsAlternate(getFieldNames(element), f)
-                    ).findAny();
+                    !getFieldNames(element).containsIgnoreCase(f.getSimpleName().toString()) &&
+                            containsAlternate(getFieldNames(element), f)
+            ).findAny();
             if (notFound.isPresent()) {
                 error(getClassName(element) + ". Dao Getter mismatch. Missing " + notFound.get().getSimpleName());
             }
@@ -195,8 +204,8 @@ public class AtkProcessor extends AbstractProcessor {
         // check for type mismatches
         for (Element field : fields) {
             getFields(element).filter(f -> f.getSimpleName().equals(field.getSimpleName())).findAny().ifPresent(f -> {
-                boolean enumMatch = isStringEnum(field) && !isStringEnum(f)  && isString(f) ||
-                        isStringEnum(f) && !isStringEnum(field)  && isString(field);
+                boolean enumMatch = isStringEnum(field) && !isStringEnum(f) && isString(f) ||
+                        isStringEnum(f) && !isStringEnum(field) && isString(field);
                 if (!field.asType().toString().equals(f.asType().toString()) && !enumMatch) {
                     error("Dao Getter mismatch. Type mismatch  " + f.getSimpleName() + " " + isStringEnum(field) + " " + isStringEnum(f));
                 }
@@ -205,8 +214,8 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected String extractDaoClassName(String atkMirror) {
-        atkMirror = atkMirror.substring(atkMirror.indexOf("daoClass=")+"daoClass=".length());
-        return atkMirror.contains(",") ? atkMirror.substring(0,atkMirror.indexOf(",")) : atkMirror.substring(atkMirror.indexOf(")"));
+        atkMirror = atkMirror.substring(atkMirror.indexOf("daoClass=") + "daoClass=".length());
+        return atkMirror.contains(",") ? atkMirror.substring(0, atkMirror.indexOf(",")) : atkMirror.substring(atkMirror.indexOf(")"));
     }
 
     protected Optional<Two<Element, Atk.Match>> getDaoClass(Element element) {
@@ -247,7 +256,7 @@ public class AtkProcessor extends AbstractProcessor {
 
         Optional<Two<Element, Atk.Match>> atk = getDaoClass(element);
         if (atk.isPresent()) {
-            assertDaoFields(element,atk.get().getFirst(),atk.get().getSecond());
+            assertDaoFields(element, atk.get().getFirst(), atk.get().getSecond());
             Strings values = new Strings();
             String cName = atk.get().getFirst().getSimpleName().toString();
             String fName = atk.get().getFirst().getSimpleName().toString().substring(0, 1).toLowerCase() + atk.get().getFirst().getSimpleName().toString().substring(1);
@@ -292,7 +301,7 @@ public class AtkProcessor extends AbstractProcessor {
                 e.asType().toString().startsWith("java.time.Local");
     }
 
-    protected Strings getElement(RoundEnvironment roundEnv,String className, Element element) {
+    protected Strings getElement(RoundEnvironment roundEnv, String className, Element element) {
 
         Strings entity = new DebugStrings();
         entity.add(getPackage(className, element) + ";\n\n");
@@ -307,7 +316,7 @@ public class AtkProcessor extends AbstractProcessor {
 
         element.getEnclosedElements().stream()
                 .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f) &&
-                        !shouldExcludeField(element,f.getSimpleName().toString()))
+                        !shouldExcludeField(element, f.getSimpleName().toString()))
                 .forEach(e -> {
                     entity.add("\t" + getField(element, e) + "\n");
                     entity.add("\t" + getAtkField(element, e) + "\n");
@@ -349,7 +358,7 @@ public class AtkProcessor extends AbstractProcessor {
                 , element.asType().toString(), element.getSimpleName()).replace("\n", "\n\t");
     }
 
-    protected String getStaticField(Element parent,String fieldName) {
+    protected String getStaticField(Element parent, String fieldName) {
         return String.format("\tpublic static final Field FIELD_%s = Reflect.getFields(%s.class).getByName(\"_%s\").get()"
                 , fieldName.toUpperCase(), getClassName(parent), fieldName);
     }
@@ -357,7 +366,7 @@ public class AtkProcessor extends AbstractProcessor {
     protected Strings getStaticFields(Element parent) {
         return parent.getEnclosedElements().stream()
                 .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f))
-                .map(e -> getStaticField(parent,e.getSimpleName().toString()))
+                .map(e -> getStaticField(parent, e.getSimpleName().toString()))
                 .distinct()
                 .collect(Collectors.toCollection(Strings::new));
     }
@@ -368,6 +377,7 @@ public class AtkProcessor extends AbstractProcessor {
 
     /**
      * exclude fields if its added somewhere else
+     *
      * @param element
      * @param name
      * @return
