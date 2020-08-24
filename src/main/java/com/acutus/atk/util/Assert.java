@@ -2,14 +2,12 @@ package com.acutus.atk.util;
 
 import com.acutus.atk.util.call.CallNilRet;
 import lombok.SneakyThrows;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
 
 
 /**
@@ -18,10 +16,10 @@ import java.util.logging.Level;
 @Slf4j
 public class Assert {
 
-    public static void isTrue(Class<? extends RuntimeException > exClass, boolean value, String msg, Object... params) {
+    public static void isTrue(Class<? extends RuntimeException> exClass, boolean value, String msg, Object... params) {
         if (!value) {
             try {
-                msg = params != null? String.format(msg,params):msg;
+                msg = params != null ? String.format(msg, params) : msg;
                 throw exClass.getConstructor(String.class).newInstance(msg);
             } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -33,14 +31,14 @@ public class Assert {
     public static void isTrue(boolean value, CallNilRet<RuntimeException> call) {
         if (!value) {
             RuntimeException ex = call.call();
-            log.warn( ex.getMessage(),ex);
+            log.warn(ex.getMessage(), ex);
             throw ex;
         }
     }
 
     public static void isTrue(boolean value, String msg) {
         if (!value) {
-             throw new RuntimeException(msg);
+            throw new RuntimeException(msg);
         }
     }
 
@@ -52,9 +50,9 @@ public class Assert {
 
     private static Object mapParam(Object value) {
         if (value != null && value instanceof Object[]) {
-            return Arrays.asList((Object[])value).stream().map(o -> mapParam(o)).reduce((s1, s2)->s1+","+s2).get();
+            return Arrays.asList((Object[]) value).stream().map(o -> mapParam(o)).reduce((s1, s2) -> s1 + "," + s2).get();
         } else if (value != null && value instanceof List) {
-            return ((List)value).stream().map(o -> mapParam(o)).reduce((s1, s2)->s1+","+s2).get();
+            return ((List) value).stream().map(o -> mapParam(o)).reduce((s1, s2) -> s1 + "," + s2).get();
         } else {
             return value;
         }
@@ -66,28 +64,28 @@ public class Assert {
             if (params != null) {
                 params = Arrays.asList(params).stream().map(o -> mapParam(o)).toArray();
             }
-            throw new RuntimeException(String.format(msg,params));
+            throw new RuntimeException(String.format(msg, params));
         }
     }
 
-    public static void notNull(Class<? extends RuntimeException > exClass, Object value, String msg) {
-        isTrue(exClass,value != null,msg);
+    public static void notNull(Class<? extends RuntimeException> exClass, Object value, String msg) {
+        isTrue(exClass, value != null, msg);
     }
 
     public static void notNull(Object value, String msg) {
-        isTrue(value != null,msg);
+        isTrue(value != null, msg);
     }
 
     public static void notNull(Object value, String msg, Object... params) {
-        isTrue(value != null,msg,params);
+        isTrue(value != null, msg, params);
     }
 
     public static void notEmpty(Collection value, String msg, Object... params) {
-        isTrue(value != null && !value.isEmpty(),msg,params);
+        isTrue(value != null && !value.isEmpty(), msg, params);
     }
 
     public static void notEmpty(Collection value, String msg) {
-        notEmpty(value,msg,null);
+        notEmpty(value, msg, null);
     }
 
 }
