@@ -30,6 +30,10 @@ import java.util.stream.Stream;
 @AutoService(Processor.class)
 public class AtkProcessor extends AbstractProcessor {
 
+    public AtkProcessor() {
+        super();
+    }
+
     protected void warning(String msg) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, msg);
     }
