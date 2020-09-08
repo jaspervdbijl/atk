@@ -76,6 +76,8 @@ public class AbstractAtk<T extends AbstractAtk, O> {
         return clone;
     }
 
-
+    public String getMd5Hash() {
+        throw new RuntimeException("Not implemented");
+    }
 
 }

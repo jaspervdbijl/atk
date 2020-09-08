@@ -17,12 +17,15 @@ import javax.tools.JavaFileObject;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.security.MessageDigest;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static com.acutus.atk.util.StringUtils.bytesToHex;
 
 @SupportedAnnotationTypes(
         "com.acutus.atk.entity.processor.Atk")
@@ -305,6 +308,7 @@ public class AtkProcessor extends AbstractProcessor {
                 e.asType().toString().startsWith("java.time.Local");
     }
 
+    @SneakyThrows
     protected Strings getElement(RoundEnvironment roundEnv, String className, Element element) {
 
         Strings entity = new DebugStrings();
@@ -327,6 +331,14 @@ public class AtkProcessor extends AbstractProcessor {
                     entity.add("\t" + getGetter(element, e) + "\n");
                     entity.add("\t" + getSetter(element, e) + "\n");
                 });
+
+        // add md5 hash
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        md.update(entity.toString("").getBytes());
+        byte[] digest = md.digest();
+        String hash = bytesToHex(digest).toUpperCase();
+
+        entity.add(String.format("\t@Override\n\tpublic String getMd5Hash() {return \"%s\";}",hash));
         entity.add("}");
 
         return entity;
