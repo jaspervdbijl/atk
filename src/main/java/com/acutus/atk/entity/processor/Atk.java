@@ -18,6 +18,10 @@ public @interface Atk {
     String classNameExt() default "Entity";
 
     Class daoClass() default Void.class;
+    boolean daoCopyAll() default true;
+
     Atk.Match daoMatch() default Atk.Match.FULL;
+
+
 
 }

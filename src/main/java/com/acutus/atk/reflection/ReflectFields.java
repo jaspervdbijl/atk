@@ -21,6 +21,11 @@ public class ReflectFields extends ArrayList<Field> {
     public ReflectFields() {
     }
 
+    public ReflectFields cloneRefFields() {
+        return stream().collect(Collectors.toCollection(ReflectFields::new));
+    }
+
+
     public ReflectFields(Collection<Field> fields) {
         super.addAll(fields);
     }
@@ -129,6 +134,10 @@ public class ReflectFields extends ArrayList<Field> {
 
     public ReflectFields copyMatchingTo(Object source, ReflectFields dstFields, Object destination) {
         return copyMatchingTo(source, dstFields, destination, new ReflectFields());
+    }
+
+    public ReflectFields copyMatchingTo(Object source, Object destination) {
+        return copyMatchingTo(source, Reflect.getFields(destination.getClass()), destination, new ReflectFields());
     }
 
 }
