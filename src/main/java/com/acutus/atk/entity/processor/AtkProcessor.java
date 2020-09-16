@@ -316,7 +316,8 @@ public class AtkProcessor extends AbstractProcessor {
     public boolean isPrimitive(Element e) {
         // determine if the type is a enum
         return e.asType().toString().startsWith("java.lang.") ||
-                e.asType().toString().startsWith("java.time.Local");
+                e.asType().toString().startsWith("java.time.Local") ||
+                e.asType().toString().equalsIgnoreCase("byte[]");
     }
 
     @SneakyThrows
@@ -414,7 +415,7 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected String getAtkField(Element parent, Field e) {
-        return String.format("public transient AtkField<%s,%s> _%s = new AtkField<>(%s,this);"
+        return String.format("private transient AtkField<%s,%s> _%s = new AtkField<>(%s,this);"
                 , e.getType().getName(), getClassName(parent), e.getName()
                 , String.format("Reflect.getFields(%s.class).getByName(\"%s\").get()"
                         , getClassName(parent), e.getName())
