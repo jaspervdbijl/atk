@@ -2,7 +2,7 @@ package com.acutus.atk.entity.processor;
 
 import com.acutus.atk.reflection.Reflect;
 import com.acutus.atk.util.Strings;
-import com.acutus.atk.util.collection.Two;
+import com.acutus.atk.util.collection.Three;
 import com.google.auto.service.AutoService;
 import lombok.SneakyThrows;
 
@@ -225,43 +225,53 @@ public class AtkProcessor extends AbstractProcessor {
         return atkMirror.contains(",") ? atkMirror.substring(0, atkMirror.indexOf(",")) : atkMirror.substring(atkMirror.indexOf(")"));
     }
 
-    protected Optional<Two<Element, Atk.Match>> getDaoClass(Element element) {
+    protected Optional<Three<Element, Atk.Match,Boolean>> getDaoClass(Element element) {
         Atk atk = element.getAnnotation(Atk.class);
         return atk == null || "java.lang.Void".equals(extractDaoClassName(atk.toString()))
                 ? Optional.empty()
-                : Optional.of(new Two<>(getClassElement(extractDaoClassName(atk.toString())), atk.daoMatch()));
+                : Optional.of(new Three<>(
+                        getClassElement(extractDaoClassName(atk.toString())), atk.daoMatch(),atk.daoCopyAll()));
     }
 
-    protected String getDaoGetterAndSetter(Element element, String cName, Element field, boolean getter) {
-        // get
+    private String getRefDaoFieldName(Element element, Element field) {
         Alternate alternate = field.getAnnotation(Alternate.class);
         Strings alternateNames = alternate != null ? Strings.asList(alternate.value())
                 .intersection(getFieldNames(element)) : new Strings();
-        if (!getFieldNames(element).contains(field.getSimpleName().toString()) &&
-                (alternateNames.isEmpty() || !getFieldNames(element).contains(alternateNames.get(0)))) {
+        if (!getFieldNames(element).containsIgnoreCase(field.getSimpleName().toString()) &&
+                (alternateNames.isEmpty() || !getFieldNames(element).containsIgnoreCase(alternateNames.get(0)))) {
             error(getClassName(element) + " could not locate any dao field match for " + field.getSimpleName() + ". Fields " + getFieldNames(element));
         }
-        final String fName = getFieldNames(element).contains(field.getSimpleName().toString())
+        return getFieldNames(element).containsIgnoreCase(field.getSimpleName().toString())
                 ? field.getSimpleName().toString()
                 : alternateNames.get(0);
+    }
+    protected boolean shouldWriteSetter(Element element, Element field) {
+        Element myField = getFields(element).filter(f -> f.getSimpleName().toString().equalsIgnoreCase(getRefDaoFieldName(element,field))).findFirst().get();
+        AtkEdit edit = myField.getAnnotation(AtkEdit.class);
+        return edit != null && edit.write();
+    }
+
+    protected String getDaoGetterAndSetter(Element element, String cName, Element field,boolean getter) {
+        // get
+        final String fName = getRefDaoFieldName(element,field);
         // check types
-        Element myField = getFields(element).filter(f -> f.getSimpleName().toString().equals(fName)).findFirst().get();
+        Element myField = getFields(element).filter(f -> f.getSimpleName().toString().equalsIgnoreCase(fName)).findFirst().get();
         boolean myFieldSsEnum = isStringEnum(myField);
         boolean daoFieldSsEnum = isStringEnum(field);
         if (myFieldSsEnum && !daoFieldSsEnum && field.asType().toString().equals("java.lang.String")) {
             String fn = field.getSimpleName().toString().substring(0, 1).toUpperCase() + field.getSimpleName().toString().substring(1);
             return getter
-                    ? String.format("%s.set%s(_%s.get() != null ? _%s.get().name() : null);", cName, fn, fName, fName)
-                    : String.format("this._%s.set(%s.get%s() != null ? %s.valueOf(%s.get%s()) : null);", fName, cName, fn, myField.asType().toString(), cName, fn);
+                    ? String.format("%s.set%s(_%s.get() != null ? _%s.get().name() : null);", cName, fn, myField.getSimpleName(), fName)
+                    : String.format("this._%s.set(%s.get%s() != null ? %s.valueOf(%s.get%s()) : null);", myField.getSimpleName(), cName, fn, myField.asType().toString(), cName, fn);
         }
         return getter
-                ? String.format("%s.set%s(_%s.get());", cName, fName.substring(0, 1).toUpperCase() + field.getSimpleName().toString().substring(1), fName)
-                : String.format("this._%s.set(%s.get%s());", fName, cName, fName.substring(0, 1).toUpperCase() + fName.substring(1));
+                ? String.format("%s.set%s(_%s.get());", cName, fName.substring(0, 1).toUpperCase() + field.getSimpleName().toString().substring(1), myField.getSimpleName())
+                : String.format("this._%s.set(%s.get%s());", myField.getSimpleName(), cName, fName.substring(0, 1).toUpperCase() + fName.substring(1));
     }
 
     protected Strings getDaoGetterAndSetter(Element element, boolean getter) {
 
-        Optional<Two<Element, Atk.Match>> atk = getDaoClass(element);
+        Optional<Three<Element, Atk.Match,Boolean>> atk = getDaoClass(element);
         if (atk.isPresent()) {
             assertDaoFields(element, atk.get().getFirst(), atk.get().getSecond());
             Strings values = new Strings();
@@ -276,6 +286,7 @@ public class AtkProcessor extends AbstractProcessor {
             // filter fields based on name and type
             getPrimitiveAndCollectionFields(atk.get().getFirst())
                     .filter(f -> getFieldNames(element).containsIgnoreCase(f.getSimpleName().toString()))
+                    .filter(f -> atk.get().getThird() || getter || shouldWriteSetter(element,f))
                     .forEach(f -> values.add(getDaoGetterAndSetter(element, fName, f, getter)));
             if (getter) {
                 values.add("return " + fName + ";");
@@ -305,7 +316,8 @@ public class AtkProcessor extends AbstractProcessor {
     public boolean isPrimitive(Element e) {
         // determine if the type is a enum
         return e.asType().toString().startsWith("java.lang.") ||
-                e.asType().toString().startsWith("java.time.Local");
+                e.asType().toString().startsWith("java.time.Local") ||
+                e.asType().toString().equalsIgnoreCase("byte[]");
     }
 
     @SneakyThrows
@@ -403,7 +415,7 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected String getAtkField(Element parent, Field e) {
-        return String.format("public transient AtkField<%s,%s> _%s = new AtkField<>(%s,this);"
+        return String.format("private transient AtkField<%s,%s> _%s = new AtkField<>(%s,this);"
                 , e.getType().getName(), getClassName(parent), e.getName()
                 , String.format("Reflect.getFields(%s.class).getByName(\"%s\").get()"
                         , getClassName(parent), e.getName())
