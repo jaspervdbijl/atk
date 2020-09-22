@@ -38,6 +38,10 @@ public class StringUtils {
         return isEmpty(value) ? "" : value;
     }
 
+    public static String maxLen(String value,int length) {
+        return notEmpty(value,"").length() > length ? value.substring(0,length) : value;
+    }
+
     /**
      * recursively replace
      *
