@@ -1,11 +1,14 @@
 package com.acutus.atk.entity;
 
+import com.acutus.atk.io.IOUtil;
 import com.acutus.atk.reflection.Reflect;
 import com.acutus.atk.reflection.ReflectFields;
 import lombok.SneakyThrows;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.acutus.atk.util.AtkUtil.getGenericType;
@@ -13,6 +16,17 @@ import static com.acutus.atk.util.AtkUtil.handle;
 
 // T the current instance and O is the original dao entity
 public class AbstractAtk<T extends AbstractAtk, O> {
+
+    private static Map<String,String> CACHED_RESOURCES = new HashMap<>();
+
+    @SneakyThrows
+    public static String getCachedResource(String resource) {
+        if (!CACHED_RESOURCES.containsKey(resource)) {
+            CACHED_RESOURCES.put(resource, new String(IOUtil.readAvailable(Thread.currentThread()
+                    .getContextClassLoader().getResourceAsStream(resource))));
+        }
+        return CACHED_RESOURCES.get(resource);
+    }
 
     public List<Class> getPathToRoot(List<Class> sources, Class source) {
         if (!source.equals(Object.class)) {
