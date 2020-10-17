@@ -17,6 +17,10 @@ public class Strings extends ArrayList<String> {
         addAll(collection);
     }
 
+    public Strings(String collection[]) {
+        addAll(Arrays.asList(collection));
+    }
+
     public static Strings asList(String... strings) {
         return new Strings(Arrays.asList(strings));
     }
