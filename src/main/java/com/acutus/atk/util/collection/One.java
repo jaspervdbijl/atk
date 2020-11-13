@@ -3,6 +3,7 @@ package com.acutus.atk.util.collection;
 import com.acutus.atk.util.Assert;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
