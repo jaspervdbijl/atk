@@ -58,17 +58,23 @@ public class AbstractAtk<T extends AbstractAtk, O> {
     @SneakyThrows
     public O toBase() {
         O base = (O) getBaseClass().getConstructor().newInstance();
-        getRefFields().copyMatchingTo(this, Reflect.getFields(base.getClass()), base);
+        getRefFields().copyMatchingTo(this, Reflect.getFields(base.getClass()), base,true);
         return base;
     }
 
-    public T initFrom(O base, AtkFieldList exclude) {
+    public T initFrom(O base, AtkFieldList exclude, boolean copyNull) {
         ReflectFields bFields = Reflect.getFields(base.getClass());
-        bFields.copyMatchingTo(base, getRefFields(), this, exclude != null ? exclude.toRefFields() : null);
+        // ignore from base ignore fields
+        bFields.removeIf(f -> f.getAnnotation(IgnoreFromBase.class) != null);
+        bFields.copyMatchingTo(base, getRefFields(), this, exclude != null ? exclude.toRefFields() : null,copyNull);
         // update set state
         bFields.stream().forEach(f -> handle(() ->
             getFields().getByName(f.getName()).ifPresent(myField -> ((AtkField)myField).setSet(true))));
         return (T) this;
+    }
+
+    public T initFrom(O base, AtkFieldList exclude) {
+        return initFrom(base,exclude,false);
     }
 
     public T initFrom(O base, AtkField... exclude) {

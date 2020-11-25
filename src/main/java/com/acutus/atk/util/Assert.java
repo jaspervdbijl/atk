@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -54,7 +55,7 @@ public class Assert {
         } else if (value != null && value instanceof List) {
             return ((List) value).stream().map(o -> mapParam(o)).reduce((s1, s2) -> s1 + "," + s2).get();
         } else {
-            return value;
+            return value instanceof Optional && ((Optional)value).isPresent() ? ((Optional)value).get() : value;
         }
     }
 

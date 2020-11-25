@@ -122,22 +122,23 @@ public class ReflectFields extends ArrayList<Field> {
     /**
      * copy matching field by name and type
      */
-    public ReflectFields copyMatchingTo(Object source, ReflectFields dstFields, Object destination, ReflectFields exclude) {
+    public ReflectFields copyMatchingTo(Object source, ReflectFields dstFields, Object destination, ReflectFields exclude, boolean copyNull) {
         stream().filter(f ->
                 dstFields.getByName(f.getName()).isPresent()
                         && f.getType().equals(dstFields.getByName(f.getName()).get().getType()) &&
-                        exclude != null && !exclude.getByName(f.getName()).isPresent()
+                        exclude != null && !exclude.getByName(f.getName()).isPresent() &&
+                        (copyNull || handle(() -> f.get(source) != null))
         )
                 .forEach(f -> handle(() -> dstFields.getByName(f.getName()).get().set(destination, f.get(source))));
         return this;
     }
 
-    public ReflectFields copyMatchingTo(Object source, ReflectFields dstFields, Object destination) {
-        return copyMatchingTo(source, dstFields, destination, new ReflectFields());
+    public ReflectFields copyMatchingTo(Object source, ReflectFields dstFields, Object destination, boolean copyNull) {
+        return copyMatchingTo(source, dstFields, destination, new ReflectFields(),copyNull);
     }
 
     public ReflectFields copyMatchingTo(Object source, Object destination) {
-        return copyMatchingTo(source, Reflect.getFields(destination.getClass()), destination, new ReflectFields());
+        return copyMatchingTo(source, Reflect.getFields(destination.getClass()), destination, new ReflectFields(),false);
     }
 
 }
