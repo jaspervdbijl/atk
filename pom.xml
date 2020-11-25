@@ -15,7 +15,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>11</java.version>
-		<auto-service.version>1.0-rc4</auto-service.version>
+		<auto-service.version>1.0-rc7</auto-service.version>
 		<lombok.version>1.18.4</lombok.version>
 	</properties>
 
