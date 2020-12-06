@@ -75,6 +75,9 @@ public class AtkUtil {
         return value != null ? value : false;
     }
 
+    public static double nonNull(Double value) {
+        return value != null ? value : 0.0;
+    }
 
 
 }
