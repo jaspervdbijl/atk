@@ -119,13 +119,17 @@ public class ReflectFields extends ArrayList<Field> {
         }
     }
 
+    private static boolean typeMatch(Class c1,Class c2) {
+        return c1.equals(c2) ||
+                (c1.getName().startsWith("java.lang") || c2.getName().startsWith("java.lang")) && c2.getSimpleName().equalsIgnoreCase(c2.getSimpleName());
+    }
     /**
      * copy matching field by name and type
      */
     public ReflectFields copyMatchingTo(Object source, ReflectFields dstFields, Object destination, ReflectFields exclude, boolean copyNull) {
         stream().filter(f ->
                 dstFields.getByName(f.getName()).isPresent()
-                        && f.getType().equals(dstFields.getByName(f.getName()).get().getType()) &&
+                        && typeMatch(f.getType(),dstFields.getByName(f.getName()).get().getType()) &&
                         exclude != null && !exclude.getByName(f.getName()).isPresent() &&
                         (copyNull || handle(() -> f.get(source) != null))
         )
