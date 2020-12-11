@@ -1,6 +1,8 @@
 package com.acutus.atk.reflection;
 
 import com.acutus.atk.util.Strings;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -16,6 +18,7 @@ import static com.acutus.atk.util.AtkUtil.handle;
 /**
  * Created by jaspervdb on 2016/06/08.
  */
+@Slf4j
 public class ReflectFields extends ArrayList<Field> {
 
     public ReflectFields() {
@@ -121,19 +124,36 @@ public class ReflectFields extends ArrayList<Field> {
 
     private static boolean typeMatch(Class c1,Class c2) {
         return c1.equals(c2) ||
-                (c1.getName().startsWith("java.lang") || c2.getName().startsWith("java.lang")) && c2.getSimpleName().equalsIgnoreCase(c2.getSimpleName());
+                (c1.getName().startsWith("java.lang") || c2.getName().startsWith("java.lang"))
+                        && c1.getSimpleName().equalsIgnoreCase(c2.getSimpleName());
+    }
+
+    private boolean matches(Object source, Field f, ReflectFields dstFields, Object destination, ReflectFields exclude, boolean copyNull) {
+        return dstFields.getByName(f.getName()).isPresent()
+                && typeMatch(f.getType(),dstFields.getByName(f.getName()).get().getType()) &&
+                (exclude == null || !exclude.getByName(f.getName()).isPresent()) &&
+                (copyNull || handle(() -> f.get(source) != null));
     }
     /**
      * copy matching field by name and type
      */
+    @SneakyThrows
     public ReflectFields copyMatchingTo(Object source, ReflectFields dstFields, Object destination, ReflectFields exclude, boolean copyNull) {
-        stream().filter(f ->
-                dstFields.getByName(f.getName()).isPresent()
-                        && typeMatch(f.getType(),dstFields.getByName(f.getName()).get().getType()) &&
-                        exclude != null && !exclude.getByName(f.getName()).isPresent() &&
-                        (copyNull || handle(() -> f.get(source) != null))
-        )
-                .forEach(f -> handle(() -> dstFields.getByName(f.getName()).get().set(destination, f.get(source))));
+        for (Field f : this) {
+            boolean matches = matches(source,f,dstFields,destination,exclude,copyNull);
+            if (matches) {
+                dstFields.getByName(f.getName()).get().set(destination, f.get(source));
+            }
+            if (f.getName().equals("rating")) {
+                log.info("Rating matches {}",matches);
+                if (!matches) {
+                    log.info("dstFields.getByName(f.getName()).isPresent() {}",dstFields.getByName(f.getName()).isPresent());
+                    log.info("typeMatch(f.getType(),dstFields.getByName(f.getName()).get().getType()) {}",typeMatch(f.getType(),dstFields.getByName(f.getName()).get().getType()));
+                    log.info("(exclude == null || !exclude.getByName(f.getName()).isPresent()) {}",(exclude == null || !exclude.getByName(f.getName()).isPresent()));
+                    log.info("(copyNull || handle(() -> f.get(source) != null)) {}",(copyNull || handle(() -> f.get(source) != null)));
+                }
+            }
+        }
         return this;
     }
 
