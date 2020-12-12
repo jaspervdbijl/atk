@@ -1,35 +1,39 @@
 package com.acutus.atk.reflection;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Created by jaspervdb on 2016/06/08.
  */
-public class ReflectMethods extends ArrayList<Method> {
+public class ReflectMethods implements Iterable<Method> {
+
+    private List<Method> methods = new ArrayList<>();
 
     public ReflectMethods() {
     }
 
     public ReflectMethods(Collection<Method> methods) {
-        super.addAll(methods);
+        methods.addAll(methods);
     }
 
 
     public ReflectMethods(Class type) {
         for (; !Object.class.equals(type); type = type.getSuperclass()) {
-            addAllFields(type);
+            addAllMethods(type);
         }
     }
 
     public ReflectMethods filter(boolean inverse, String... names) {
-        return stream().filter(f -> !inverse == Arrays.stream(names)
+        return new ReflectMethods(methods.stream().filter(f -> !inverse == Arrays.stream(names)
                 .filter(n -> f.getName().equalsIgnoreCase(n)).findFirst().isPresent())
-                .collect(Collectors.toCollection(ReflectMethods::new));
+                .collect(Collectors.toList()));
     }
 
     public ReflectMethods filter(String... names) {
@@ -37,18 +41,18 @@ public class ReflectMethods extends ArrayList<Method> {
     }
 
     public ReflectMethods filter(Class<? extends Annotation> aType) {
-        return stream().filter(m -> m.getAnnotation(aType) != null).collect(Collectors.toCollection(ReflectMethods::new));
+        return new ReflectMethods(methods.stream().filter(m -> m.getAnnotation(aType) != null).collect(Collectors.toList()));
     }
 
-    public void addAllFields(Class type) {
+    private void addAllMethods(Class type) {
         for (Method method : type.getMethods()) {
             method.setAccessible(true);
-            add(method);
+            methods.add(method);
         }
     }
 
     public Method get(boolean ignoreCase, String name) {
-        for (Method method : this) {
+        for (Method method : methods) {
             if (ignoreCase ? method.getName().equalsIgnoreCase(name) : method.getName().equals(name)) {
                 return method;
             }
@@ -56,14 +60,31 @@ public class ReflectMethods extends ArrayList<Method> {
         return null;
     }
 
+    public Method get(int index) {
+        return methods.get(index);
+    }
+
+    private void add(Method method) {
+        methods.add(method);
+    }
+
+
     public ReflectMethods getByNames(boolean ignoreCase, String... names) {
-        ReflectMethods fields = new ReflectMethods();
+        ReflectMethods values = new ReflectMethods();
         for (String name : names) {
             if (get(ignoreCase, name) != null) {
-                fields.add(get(ignoreCase, name));
+                values.add(get(ignoreCase, name));
             }
         }
-        return fields;
+        return values;
+    }
+
+    public boolean isEmpty() {
+        return methods.isEmpty();
+    }
+
+    public int size() {
+        return methods.size();
     }
 
     public ReflectMethods getByNames(String... names) {
@@ -71,8 +92,8 @@ public class ReflectMethods extends ArrayList<Method> {
     }
 
     public ReflectMethods filterByReturnType(Class type) {
-        return stream().filter(m -> type.isAssignableFrom(m.getReturnType()))
-                .collect(Collectors.toCollection(ReflectMethods::new));
+        return new ReflectMethods(methods.stream().filter(m -> type.isAssignableFrom(m.getReturnType()))
+                .collect(Collectors.toList()));
     }
 
     private boolean paramEquals(List<Class> l1, List<Class> l2) {
@@ -82,7 +103,7 @@ public class ReflectMethods extends ArrayList<Method> {
     }
 
     public ReflectMethods filterStatic(boolean inverse) {
-        return stream().filter(m -> Modifier.isStatic(m.getModifiers()) != inverse).collect(Collectors.toCollection(ReflectMethods::new));
+        return new ReflectMethods(methods.stream().filter(m -> Modifier.isStatic(m.getModifiers()) != inverse) .collect(Collectors.toList()));
     }
 
     public ReflectMethods filterStatic() {
@@ -90,10 +111,10 @@ public class ReflectMethods extends ArrayList<Method> {
     }
 
     public ReflectMethods filterParams(Class... params) {
-        return stream().filter(m ->
+        return new ReflectMethods(methods.stream().filter(m ->
                 paramEquals(Arrays.stream(m.getParameters()).map(p -> p.getType()).collect(Collectors.toList())
                         , Arrays.asList((params == null ? new Class[]{} : params))))
-                .collect(Collectors.toCollection(ReflectMethods::new));
+                .collect(Collectors.toList()));
     }
 
     public Optional<Method> getByName(String name, boolean ignoreCase) {
@@ -118,10 +139,25 @@ public class ReflectMethods extends ArrayList<Method> {
     }
 
     public ReflectMethods setAccessible(boolean accessible) {
-        for (Method method : this) {
+        for (Method method : methods) {
             method.setAccessible(accessible);
         }
         return this;
     }
+
+    @Override
+    public Iterator<Method> iterator() {
+        return methods.iterator();
+    }
+
+    public Stream<Method> stream() {
+        return methods.stream();
+    }
+
+    public Collection<Method> toCollection() {
+        return new ArrayList<>(methods);
+    }
+
+
 
 }
