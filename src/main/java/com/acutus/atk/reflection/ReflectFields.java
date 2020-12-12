@@ -33,7 +33,7 @@ public class ReflectFields implements Iterable<Field> {
 
 
     public ReflectFields(Collection<Field> fields) {
-        fields.addAll(fields);
+        this.fields.addAll(fields);
     }
 
     public ReflectFields(Class type) {

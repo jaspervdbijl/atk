@@ -20,7 +20,7 @@ public class ReflectMethods implements Iterable<Method> {
     }
 
     public ReflectMethods(Collection<Method> methods) {
-        methods.addAll(methods);
+        this.methods.addAll(methods);
     }
 
 
