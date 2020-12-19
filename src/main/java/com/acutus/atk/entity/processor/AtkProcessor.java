@@ -59,11 +59,6 @@ public class AtkProcessor extends AbstractProcessor {
         return getFields(root).filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f));
     }
 
-    public Stream<? extends Element> getPrimitiveAndCollectionFields(Element root) {
-        return getFields(root).filter(f -> ElementKind.FIELD.equals(f.getKind()) ||
-                f.asType().toString().startsWith("java.util.") && f.asType().toString().contains("List"));
-    }
-
     public Strings getFieldNames(Element root) {
         return getFields(root)
                 .map(f -> f.getSimpleName().toString())
@@ -284,7 +279,7 @@ public class AtkProcessor extends AbstractProcessor {
                 values.add(String.format("public " + getClassName(element) + " initFrom" + atk.get().getFirst().getSimpleName() + "(%s %s) {", cName, fName));
             }
             // filter fields based on name and type
-            getPrimitiveAndCollectionFields(atk.get().getFirst())
+            getPrimitiveFields(atk.get().getFirst())
                     .filter(f -> getFieldNames(element).containsIgnoreCase(f.getSimpleName().toString()))
                     .filter(f -> atk.get().getThird() || getter || shouldWriteSetter(element,f))
                     .forEach(f -> values.add(getDaoGetterAndSetter(element, fName, f, getter)));
