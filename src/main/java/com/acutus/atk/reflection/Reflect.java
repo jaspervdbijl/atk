@@ -21,7 +21,7 @@ public class Reflect<T> {
     }
 
     @Synchronized
-    public static ReflectFields getFields(Class type) {
+    public static synchronized ReflectFields getFields(Class type) {
         if (!FIELD_MAP.containsKey(type)) {
             FIELD_MAP.put(type, new ReflectFields(type));
         }

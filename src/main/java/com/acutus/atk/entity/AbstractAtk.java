@@ -5,10 +5,7 @@ import com.acutus.atk.reflection.Reflect;
 import com.acutus.atk.reflection.ReflectFields;
 import lombok.SneakyThrows;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.acutus.atk.util.AtkUtil.getGenericType;
@@ -64,9 +61,10 @@ public class AbstractAtk<T extends AbstractAtk, O> {
 
     public T initFrom(O base, AtkFieldList exclude, boolean copyNull) {
         ReflectFields bFields = Reflect.getFields(base.getClass());
+        exclude = exclude == null ? new AtkFieldList() : exclude;
         // ignore from base ignore fields
-        bFields.removeIf(f -> f.getAnnotation(IgnoreFromBase.class) != null);
-        bFields.copyMatchingTo(base, getRefFields(), this, exclude != null ? exclude.toRefFields() : null,copyNull);
+        exclude.addAll(bFields.filterAnnotation(IgnoreFromBase.class).toCollection());
+        bFields.copyMatchingTo(base, getRefFields(), this, exclude.toRefFields(),copyNull);
         // update set state
         bFields.stream().forEach(f -> handle(() ->
             getFields().getByName(f.getName()).ifPresent(myField -> ((AtkField)myField).setSet(true))));

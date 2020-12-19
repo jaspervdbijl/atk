@@ -1,33 +1,39 @@
 package com.acutus.atk.reflection;
 
 import com.acutus.atk.util.Strings;
+import com.google.common.collect.UnmodifiableListIterator;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
+import javax.print.attribute.UnmodifiableSetException;
+import java.lang.instrument.UnmodifiableModuleException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.acutus.atk.util.AtkUtil.handle;
 
 /**
  * Created by jaspervdb on 2016/06/08.
  */
-public class ReflectFields extends ArrayList<Field> {
+@Slf4j
+public class ReflectFields implements Iterable<Field> {
+
+    private List<Field> fields = new ArrayList<>();
 
     public ReflectFields() {
     }
 
     public ReflectFields cloneRefFields() {
-        return stream().collect(Collectors.toCollection(ReflectFields::new));
+        return new ReflectFields(fields.stream().collect(Collectors.toList()));
     }
 
 
     public ReflectFields(Collection<Field> fields) {
-        super.addAll(fields);
+        this.fields.addAll(fields);
     }
 
     public ReflectFields(Class type) {
@@ -36,32 +42,39 @@ public class ReflectFields extends ArrayList<Field> {
         }
     }
 
-
-    public void addAllFields(Class type) {
+    private void addAllFields(Class type) {
         for (Field field : type.getDeclaredFields()) {
             if (!Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
                 field.setAccessible(true);
-                add(field);
+                fields.add(field);
             }
         }
     }
 
+    public boolean isEmpty() {
+        return fields.isEmpty();
+    }
+
+    public Field get(int index) {
+        return fields.get(index);
+    }
+
+    private void add(Field field) {
+        fields.add(field);
+    }
+
+
     public Strings getNames() {
-        return stream().map(f -> f.getName()).collect(Collectors.toCollection(Strings::new));
+        return fields.stream().map(f -> f.getName()).collect(Collectors.toCollection(Strings::new));
     }
 
     public Optional<Field> get(String name) {
-        return stream().filter(f -> f.getName().equals(name)).findFirst();
-    }
-
-    public ReflectFields remove(String name) {
-        remove(get(name));
-        return this;
+        return fields.stream().filter(f -> f.getName().equals(name)).findFirst();
     }
 
     public ReflectFields getByNames(Strings names) {
-        return stream().filter(f -> names.contains(f.getName()))
-                .collect(Collectors.toCollection(ReflectFields::new));
+        return new ReflectFields(fields.stream().filter(f -> names.contains(f.getName()))
+                .collect(Collectors.toList()));
     }
 
     public Optional<Field> getByName(String name) {
@@ -70,13 +83,13 @@ public class ReflectFields extends ArrayList<Field> {
     }
 
     public ReflectFields filterType(Class filterClass, boolean inverse) {
-        ReflectFields fields = new ReflectFields();
-        for (Field field : this) {
+        List<Field> values = new ArrayList<>();
+        for (Field field : fields) {
             if (inverse != filterClass.isAssignableFrom(field.getType())) {
-                fields.add(field);
+                values.add(field);
             }
         }
-        return fields;
+        return new ReflectFields(values);
     }
 
     public ReflectFields filterType(Class filterClass) {
@@ -84,24 +97,24 @@ public class ReflectFields extends ArrayList<Field> {
     }
 
     public ReflectFields filterAnnotation(Class ano) {
-        return new ReflectFields((Collection<Field>) stream().filter(f -> f.getAnnotation(ano) != null)
+        return new ReflectFields(fields.stream().filter(f -> f.getAnnotation(ano) != null)
                 .collect(Collectors.toList()));
     }
 
     public ReflectFields filter(Predicate<Field> predicate) {
-        return stream().filter(predicate)
-                .collect(Collectors.toCollection(ReflectFields::new));
+        return new ReflectFields(fields.stream().filter(predicate)
+                .collect(Collectors.toList()));
     }
 
     public ReflectFields getNonNull(Object ref) {
         try {
-            ReflectFields fields = new ReflectFields();
-            for (Field field : this) {
+            ReflectFields values = new ReflectFields();
+            for (Field field : fields) {
                 if (field.get(ref) != null) {
-                    fields.add(field);
+                    values.add(field);
                 }
             }
-            return fields;
+            return values;
         } catch (IllegalAccessException ie) {
             throw new RuntimeException(ie);
         }
@@ -110,7 +123,7 @@ public class ReflectFields extends ArrayList<Field> {
     public <T> List<T> getInstances(Class<T> type, Object source) {
         try {
             List<T> instances = new ArrayList<>();
-            for (Field field : filterType(type)) {
+            for (Field field : filterType(type).fields) {
                 instances.add((T) field.get(source));
             }
             return instances;
@@ -121,18 +134,22 @@ public class ReflectFields extends ArrayList<Field> {
 
     private static boolean typeMatch(Class c1,Class c2) {
         return c1.equals(c2) ||
-                (c1.getName().startsWith("java.lang") || c2.getName().startsWith("java.lang")) && c2.getSimpleName().equalsIgnoreCase(c2.getSimpleName());
+                (c1.getName().startsWith("java.lang") || c2.getName().startsWith("java.lang"))
+                        && c1.getSimpleName().equalsIgnoreCase(c2.getSimpleName());
+    }
+
+    private boolean matches(Object source, Field f, ReflectFields dstFields, Object destination, ReflectFields exclude, boolean copyNull) {
+        return dstFields.getByName(f.getName()).isPresent()
+                && typeMatch(f.getType(),dstFields.getByName(f.getName()).get().getType()) &&
+                (exclude == null || !exclude.getByName(f.getName()).isPresent()) &&
+                (copyNull || handle(() -> f.get(source) != null));
     }
     /**
      * copy matching field by name and type
      */
+    @SneakyThrows
     public ReflectFields copyMatchingTo(Object source, ReflectFields dstFields, Object destination, ReflectFields exclude, boolean copyNull) {
-        stream().filter(f ->
-                dstFields.getByName(f.getName()).isPresent()
-                        && typeMatch(f.getType(),dstFields.getByName(f.getName()).get().getType()) &&
-                        exclude != null && !exclude.getByName(f.getName()).isPresent() &&
-                        (copyNull || handle(() -> f.get(source) != null))
-        )
+        fields.stream().filter(f -> matches(source,f,dstFields,destination,exclude,copyNull))
                 .forEach(f -> handle(() -> dstFields.getByName(f.getName()).get().set(destination, f.get(source))));
         return this;
     }
@@ -145,4 +162,16 @@ public class ReflectFields extends ArrayList<Field> {
         return copyMatchingTo(source, Reflect.getFields(destination.getClass()), destination, new ReflectFields(),false);
     }
 
+    @Override
+    public Iterator<Field> iterator() {
+        return fields.iterator();
+    }
+
+    public Stream<Field> stream() {
+        return fields.stream();
+    }
+
+    public Collection<Field> toCollection() {
+        return new ArrayList<>(fields);
+    }
 }
