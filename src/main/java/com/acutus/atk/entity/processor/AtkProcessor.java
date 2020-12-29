@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -59,11 +60,6 @@ public class AtkProcessor extends AbstractProcessor {
         return getFields(root).filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f));
     }
 
-    public Stream<? extends Element> getPrimitiveAndCollectionFields(Element root) {
-        return getFields(root).filter(f -> ElementKind.FIELD.equals(f.getKind()) ||
-                f.asType().toString().startsWith("java.util.") && f.asType().toString().contains("List"));
-    }
-
     public Strings getFieldNames(Element root) {
         return getFields(root)
                 .map(f -> f.getSimpleName().toString())
@@ -99,7 +95,7 @@ public class AtkProcessor extends AbstractProcessor {
                 , "import java.util.stream.Collectors", "import java.lang.reflect.Field"
                 , "import com.acutus.atk.reflection.Reflect");
         // append all the DAO classes
-        getDaoClass(element).ifPresent(atk -> imports.add("import " + atk.getFirst().toString()));
+        getDaoClass(element).stream().forEach(atk -> imports.add("import " + atk.getFirst().toString()));
         return imports;
     }
 
@@ -220,17 +216,18 @@ public class AtkProcessor extends AbstractProcessor {
         }
     }
 
-    protected String extractDaoClassName(String atkMirror) {
+    protected List<String> extractDaoClassNames(String atkMirror) {
         atkMirror = atkMirror.substring(atkMirror.indexOf("daoClass=") + "daoClass=".length());
-        return atkMirror.contains(",") ? atkMirror.substring(0, atkMirror.indexOf(",")) : atkMirror.substring(atkMirror.indexOf(")"));
+        atkMirror = atkMirror.contains(", ") ? atkMirror.substring(0, atkMirror.indexOf(", ")) : atkMirror.substring(atkMirror.indexOf(")"));
+        return !atkMirror.isEmpty()  ? Arrays.asList(atkMirror.split(",")) : List.of();
     }
 
-    protected Optional<Three<Element, Atk.Match,Boolean>> getDaoClass(Element element) {
+    protected List<Three<Element, Atk.Match,Boolean>> getDaoClass(Element element) {
         Atk atk = element.getAnnotation(Atk.class);
-        return atk == null || "java.lang.Void".equals(extractDaoClassName(atk.toString()))
-                ? Optional.empty()
-                : Optional.of(new Three<>(
-                        getClassElement(extractDaoClassName(atk.toString())), atk.daoMatch(),atk.daoCopyAll()));
+        return atk == null || extractDaoClassNames(atk.toString()).isEmpty()
+                ? List.of()
+                : extractDaoClassNames(atk.toString()).stream()
+                .map(c -> new Three<>(getClassElement(c), atk.daoMatch(),atk.daoCopyAll())).collect(Collectors.toList());
     }
 
     private String getRefDaoFieldName(Element element, Element field) {
@@ -270,41 +267,36 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected Strings getDaoGetterAndSetter(Element element, boolean getter) {
-
-        Optional<Three<Element, Atk.Match,Boolean>> atk = getDaoClass(element);
-        if (atk.isPresent()) {
-            assertDaoFields(element, atk.get().getFirst(), atk.get().getSecond());
-            Strings values = new Strings();
-            String cName = atk.get().getFirst().getSimpleName().toString();
-            String fName = atk.get().getFirst().getSimpleName().toString().substring(0, 1).toLowerCase() + atk.get().getFirst().getSimpleName().toString().substring(1);
+        Strings values = new Strings();
+        for (Three<Element, Atk.Match,Boolean> atk : getDaoClass(element)) {
+            assertDaoFields(element, atk.getFirst(), atk.getSecond());
+            String cName = atk.getFirst().getSimpleName().toString();
+            String fName = atk.getFirst().getSimpleName().toString().substring(0, 1).toLowerCase() + atk.getFirst().getSimpleName().toString().substring(1);
             if (getter) {
-                values.add("public " + atk.get().getFirst().getSimpleName() + " to" + atk.get().getFirst().getSimpleName() + "() {");
-                values.add(String.format("%s %s  = new %s();", cName, fName, cName));
+                values.add("public " + atk.getFirst().getSimpleName() + " to" + atk.getFirst().getSimpleName() + "() {");
+                values.add(String.format("\t%s %s  = new %s();", cName, fName, cName));
             } else {
-                values.add(String.format("public " + getClassName(element) + " initFrom" + atk.get().getFirst().getSimpleName() + "(%s %s) {", cName, fName));
+                values.add(String.format("public " + getClassName(element) + " initFrom" + atk.getFirst().getSimpleName() + "(%s %s) {", cName, fName));
             }
             // filter fields based on name and type
-            getPrimitiveAndCollectionFields(atk.get().getFirst())
+            getPrimitiveFields(atk.getFirst())
                     .filter(f -> getFieldNames(element).containsIgnoreCase(f.getSimpleName().toString()))
-                    .filter(f -> atk.get().getThird() || getter || shouldWriteSetter(element,f))
-                    .forEach(f -> values.add(getDaoGetterAndSetter(element, fName, f, getter)));
+                    .filter(f -> atk.getThird() || getter || shouldWriteSetter(element,f))
+                    .forEach(f -> values.add("\t"+getDaoGetterAndSetter(element, fName, f, getter)));
             if (getter) {
-                values.add("return " + fName + ";");
+                values.add("\treturn " + fName + ";");
             } else {
-                values.add("return this;");
+                values.add("\treturn this;");
             }
-            values.add("}");
+            values.add("}\n");
             IntStream.range(1, values.size() - 1).forEach(i -> values.set(i, "\t" + values.get(i)));
-            return values.prepend("\t");
-        } else {
-            return new Strings();
         }
+        return values.prepend("\t");
     }
 
     protected Strings getMethods(String className, Element element) {
         return Strings.asList();
     }
-
 
     /**
      * expand to include other supported field types
@@ -324,11 +316,11 @@ public class AtkProcessor extends AbstractProcessor {
     protected Strings getElement(RoundEnvironment roundEnv, String className, Element element) {
 
         Strings entity = new DebugStrings();
-        entity.add(getPackage(className, element) + ";\n\n");
+        entity.add(getPackage(className, element) + ";\n");
         entity.add(getImports(element).append(";\n").toString(""));
         entity.add(getClassNameLine(element) + "\n");
-        entity.add(getConstructors(element).append("\n").toString(""));
         entity.add(getStaticFields(element).append(";\n").toString(""));
+        entity.add(getConstructors(element).prepend("\t").append("\n").toString(""));
         entity.add(getExtraFields(element).append(";\n").toString(""));
         entity.add(getMethods(className, element).append("\n").toString(""));
         entity.add(getDaoGetterAndSetter(element, false).append("\n").toString(""));
