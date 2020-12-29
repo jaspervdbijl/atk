@@ -215,11 +215,11 @@ public class AtkProcessor extends AbstractProcessor {
             });
         }
     }
-// @com.acutus.atk.db.processor.AtkEntity(daoCopyAll=true, daoMatch=FULL, daoClass=com.acutus.atk.db.entity.PersonV1,com.acutus.atk.db.entity.PersonV2, maintainIndex=true, maintainForeignKeys=true, maintainColumnsFilter={}, maintainColumns=true, maintainEntity=true, auditTable=false, addAuditFields=false, version=0, classNameExt="Entity", className="", viewSqlResource="", type=TABLE, tableNamingStrategy=LOWER_CASE_UNDERSCORE, columnNamingStrategy=CAMEL_CASE_UNDERSCORE)
+
     protected List<String> extractDaoClassNames(String atkMirror) {
         atkMirror = atkMirror.substring(atkMirror.indexOf("daoClass=") + "daoClass=".length());
         atkMirror = atkMirror.contains(", ") ? atkMirror.substring(0, atkMirror.indexOf(", ")) : atkMirror.substring(atkMirror.indexOf(")"));
-        return atkMirror.contains(",") ? Arrays.asList(atkMirror.split(",")) : List.of();
+        return !atkMirror.isEmpty()  ? Arrays.asList(atkMirror.split(",")) : List.of();
     }
 
     protected List<Three<Element, Atk.Match,Boolean>> getDaoClass(Element element) {
