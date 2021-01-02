@@ -22,6 +22,8 @@ public @interface Atk {
 
     Atk.Match daoMatch() default Atk.Match.FULL;
 
+    String [] daoIgnore() default {};
+
 
 
 }
