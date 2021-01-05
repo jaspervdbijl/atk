@@ -1,5 +1,6 @@
 package com.acutus.atk.entity;
 
+import com.acutus.atk.entity.processor.AtkEdit;
 import com.acutus.atk.io.IOUtil;
 import com.acutus.atk.reflection.Reflect;
 import com.acutus.atk.reflection.ReflectFields;
@@ -61,10 +62,11 @@ public class AbstractAtk<T extends AbstractAtk, O> {
 
     public T initFrom(O base, AtkFieldList exclude, boolean copyNull) {
         ReflectFields bFields = Reflect.getFields(base.getClass());
-        exclude = exclude == null ? new AtkFieldList() : exclude;
         // ignore from base ignore fields
-        exclude.addAll(bFields.filterAnnotation(IgnoreFromBase.class).toCollection());
-        bFields.copyMatchingTo(base, getRefFields(), this, exclude.toRefFields(),copyNull);
+        ReflectFields exclFields = (exclude == null ? new AtkFieldList() : exclude).toRefFields()
+                .addAll(bFields.stream().filter(f -> f.getAnnotation(AtkEdit.class) != null)
+                        .collect(Collectors.toList()));
+        bFields.copyMatchingTo(base, getRefFields(), this, exclFields,copyNull);
         // update set state
         bFields.stream().forEach(f -> handle(() ->
             getFields().getByName(f.getName()).ifPresent(myField -> ((AtkField)myField).setSet(true))));

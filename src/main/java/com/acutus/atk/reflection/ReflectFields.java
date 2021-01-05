@@ -31,6 +31,10 @@ public class ReflectFields implements Iterable<Field> {
         return new ReflectFields(fields.stream().collect(Collectors.toList()));
     }
 
+    public ReflectFields addAll(Collection<Field> fields) {
+        this.fields.addAll(fields);
+        return this;
+    }
 
     public ReflectFields(Collection<Field> fields) {
         this.fields.addAll(fields);
