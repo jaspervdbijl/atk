@@ -23,6 +23,11 @@ public class Strings extends ArrayList<String> {
         addAll(Arrays.asList(collection));
     }
 
+    public Strings concat(Strings lists[]) {
+        Arrays.stream(lists).forEach(i -> add(i));
+        return this;
+    }
+
     public static Strings asList(String... strings) {
         return new Strings(Arrays.asList(strings));
     }
