@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.acutus.atk.util.AtkUtil.handle;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
 
 @NoArgsConstructor
 public class Strings extends ArrayList<String> {
@@ -21,12 +23,23 @@ public class Strings extends ArrayList<String> {
         addAll(Arrays.asList(collection));
     }
 
+    public Strings concat(Strings lists[]) {
+        Arrays.stream(lists).forEach(i -> add(i));
+        return this;
+    }
+
     public static Strings asList(String... strings) {
         return new Strings(Arrays.asList(strings));
     }
 
+    public Strings(StringTokenizer st) {
+        for (; st.hasMoreTokens();) {
+            add(st.nextToken());
+        }
+    }
+
     public int indexOfIgnoreCase(String value) {
-        Optional<Integer> index = IntStream.range(0,size()).filter(i -> value.toUpperCase().equals(get(i).toUpperCase()))
+        Optional<Integer> index = IntStream.range(0,size()).filter(i -> value.equalsIgnoreCase(get(i)))
                 .boxed().findFirst();
         return index.isPresent() ? index.get() : -1;
     }
@@ -36,8 +49,11 @@ public class Strings extends ArrayList<String> {
      * @return
      */
     public List<Integer> indexesOfContains(String text) {
-        return IntStream.range(0,size()).filter(i -> get(i).contains(text))
-                .boxed().collect(Collectors.toList());
+        return IntStream.range(0,size()).filter(i -> get(i).contains(text)).boxed().collect(toList());
+    }
+
+    public void add(ArrayList<String> input) {
+        input.stream().forEach(i -> add(i));
     }
 
     public OptionalInt firstIndexesOfContains(String text) {
@@ -47,12 +63,11 @@ public class Strings extends ArrayList<String> {
 
     public Strings replace(String oldV, String newV) {
         return stream().map(s -> s != null?s.replace(oldV,newV):null)
-                .collect(Collectors.toCollection(Strings::new));
+                .collect(toCollection(Strings::new));
     }
 
     public Strings replace(CallOneRet<String,String> call) {
-        return stream().map(s -> handle(() -> call.call(s))).collect(Collectors.toCollection(Strings::new));
-
+        return stream().map(s -> handle(() -> call.call(s))).collect(toCollection(Strings::new));
     }
 
     public boolean equalsIgnoreOrderIgnoreCase(Strings values) {
@@ -83,16 +98,21 @@ public class Strings extends ArrayList<String> {
         return toString("\n");
     }
 
-    public static void main(String[] args) {
-        System.out.println(new Strings().append(";\n").toString(""));
+    public Strings removeEmpty() {
+        removeAll(Arrays.asList(null, ""));
+        return this;
+    }
+
+    public Strings removeDuplicates() {
+        return stream().distinct().collect(Collectors.toCollection(Strings::new));
     }
 
     public Strings prepend(String value) {
-        return new Strings(stream().map(s -> value + s).collect(Collectors.toList()));
+        return new Strings(stream().map(s -> value + s).collect(toList()));
     }
 
     public Strings append(String value) {
-        return new Strings(stream().map(s -> s + value).collect(Collectors.toList()));
+        return new Strings(stream().map(s -> s + value).collect(toList()));
     }
 
     public Strings plus(String... values) {
@@ -110,11 +130,11 @@ public class Strings extends ArrayList<String> {
     }
 
     public Strings toUpper() {
-        return stream().map(s -> s != null ? s.toUpperCase() : s).collect(Collectors.toCollection(Strings::new));
+        return stream().map(s -> s != null ? s.toUpperCase() : s).collect(toCollection(Strings::new));
     }
 
     public Strings toLower() {
-        return stream().map(s -> s != null ? s.toLowerCase() : s).collect(Collectors.toCollection(Strings::new));
+        return stream().map(s -> s != null ? s.toLowerCase() : s).collect(toCollection(Strings::new));
     }
 
     /**
@@ -152,12 +172,20 @@ public class Strings extends ArrayList<String> {
     public Strings transform(CallOneRet<String, String> call) {
         return stream()
                 .map(s -> handle(() -> call.call(s)))
-                .collect(Collectors.toCollection(Strings::new));
+                .collect(toCollection(Strings::new));
     }
 
     public Strings intersection(Strings values) {
         return stream().filter(s -> values.contains(s))
-                .collect(Collectors.toCollection(Strings::new));
+                .collect(toCollection(Strings::new));
+    }
+
+    public Strings(String stream, String delimiter) {
+        for (; stream.indexOf(delimiter) != -1;) {
+            add(stream.substring(0, stream.indexOf(delimiter)));
+            stream = stream.substring(stream.indexOf(delimiter) + delimiter.length());
+        }
+        add(stream);
     }
 
 
