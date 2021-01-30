@@ -1,5 +1,8 @@
 package com.acutus.atk.util;
 
+import com.acutus.atk.util.call.CallNilRet;
+import lombok.SneakyThrows;
+
 import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -36,6 +39,11 @@ public class StringUtils {
 
     public static String defaultString(String value) {
         return isEmpty(value) ? "" : value;
+    }
+
+    @SneakyThrows
+    public static String defaultString(String value, CallNilRet<String> call,String defaultValue) {
+        return isNotEmpty(value) ? call.call() : defaultValue;
     }
 
     public static String maxLen(String value,int length) {
