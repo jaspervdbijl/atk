@@ -2,6 +2,7 @@ package com.acutus.atk.util;
 
 import com.acutus.atk.util.call.CallNil;
 import com.acutus.atk.util.call.CallNilRet;
+import com.acutus.atk.util.call.CallOne;
 import lombok.SneakyThrows;
 
 import java.io.PrintWriter;
@@ -17,6 +18,16 @@ public class AtkUtil {
     public static void handle(CallNil call) {
         call.call();
     }
+
+    @SneakyThrows
+    public static void handle(CallNil call, CallOne<Exception> handle) {
+        try {
+            call.call();
+        } catch (Exception ex) {
+            handle.call(ex);
+        }
+    }
+
 
     @SneakyThrows
     public static <T, R> R handle(CallNilRet<R> call) {
