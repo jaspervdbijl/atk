@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.util.Optional;
 
 import static com.acutus.atk.util.StringUtils.subLength;
 
@@ -32,6 +33,16 @@ public class AtkUtil {
     @SneakyThrows
     public static <T, R> R handle(CallNilRet<R> call) {
         return call.call();
+    }
+
+    @SneakyThrows
+    public static <T, R> Optional<R> handle(CallNilRet<R> call,CallOne<Exception> handleEx) {
+        try {
+            return Optional.of(call.call());
+        } catch (Exception ex) {
+            handleEx.call(ex);
+            return Optional.empty();
+        }
     }
 
     public static boolean equals(Object o1, Object o2) {
