@@ -4,6 +4,7 @@ import com.acutus.atk.util.call.CallNil;
 import com.acutus.atk.util.call.CallNilRet;
 import com.acutus.atk.util.call.CallOne;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 import static com.acutus.atk.util.StringUtils.subLength;
 
+@Slf4j
 public class AtkUtil {
 
     @SneakyThrows
@@ -25,6 +27,7 @@ public class AtkUtil {
         try {
             call.call();
         } catch (Exception ex) {
+            log.warn(ex.getMessage(),ex);
             handle.call(ex);
         }
     }
@@ -40,6 +43,7 @@ public class AtkUtil {
         try {
             return Optional.of(call.call());
         } catch (Exception ex) {
+            log.warn(ex.getMessage(),ex);
             handleEx.call(ex);
             return Optional.empty();
         }
