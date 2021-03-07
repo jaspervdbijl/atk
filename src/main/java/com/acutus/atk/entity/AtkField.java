@@ -105,6 +105,7 @@ public class AtkField<T,R> {
         changed = field.changed;
         set = field.set;
         oldValue = (T) field.getOldValue();
+        ignore = field.ignore;
 
     }
 

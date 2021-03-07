@@ -96,6 +96,11 @@ public class AbstractAtk<T extends AbstractAtk, O> {
         return clone;
     }
 
+    public T ignoreFields() {
+        getFields().stream().forEach(f -> ((AtkField)f).ignore());
+        return (T) this;
+    }
+
     public String getMd5Hash() {
         throw new RuntimeException("Not implemented");
     }
