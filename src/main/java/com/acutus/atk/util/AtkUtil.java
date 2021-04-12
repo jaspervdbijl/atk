@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.text.ParseException;
 import java.util.Optional;
 
 import static com.acutus.atk.util.StringUtils.subLength;
@@ -105,5 +106,13 @@ public class AtkUtil {
         return value != null ? value : 0.0;
     }
 
+    public static boolean isInt(String value) {
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (NumberFormatException pe) {
+            return false;
+        }
+    }
 
 }
