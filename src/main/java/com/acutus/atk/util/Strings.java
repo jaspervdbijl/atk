@@ -188,5 +188,8 @@ public class Strings extends ArrayList<String> {
         add(stream);
     }
 
+    public static void main(String[] args) {
+        System.out.println(Strings.asList(null,"","Heloo").removeEmpty().toString());
+    }
 
 }
