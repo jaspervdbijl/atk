@@ -89,7 +89,10 @@ public class AtkProcessor extends AbstractProcessor {
 
         for (TypeElement annotation : annotations) {
             roundEnv.getElementsAnnotatedWith(annotation).stream().
-                    forEach(e -> processElement(roundEnv, ((TypeElement) e).getQualifiedName().toString(), e));
+                    forEach(e -> {
+                        validate(e);
+                        processElement(roundEnv, ((TypeElement) e).getQualifiedName().toString(), e);
+                    });
         }
 
         return true;
@@ -343,6 +346,15 @@ public class AtkProcessor extends AbstractProcessor {
         return e.asType().toString().startsWith("java.lang.") ||
                 e.asType().toString().startsWith("java.time.Local") ||
                 e.asType().toString().equalsIgnoreCase("byte[]");
+    }
+
+    /**
+     * override to implement custom logic
+     * validate the entity
+     *
+     * @param element
+     */
+    protected void validate(Element element) {
     }
 
     @SneakyThrows
