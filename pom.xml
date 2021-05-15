@@ -54,38 +54,5 @@
 				</configuration>
 			</plugin>
 		</plugins>
-<!--		<extensions>-->
-<!--			<extension>-->
-<!--				<groupId>com.gkatzioura.maven.cloud</groupId>-->
-<!--				<artifactId>azure-storage-wagon</artifactId>-->
-<!--				<version>1.0</version>-->
-<!--			</extension>-->
-<!--		</extensions>-->
 	</build>
-
-<!--	<distributionManagement>-->
-<!--		<snapshotRepository>-->
-<!--			<id>dev-azure-com-jaspervdbijl-jaspervdbijl</id>-->
-<!--			<url>https://pkgs.dev.azure.com/jaspervdbijl/_packaging/jaspervdbijl/maven/v1</url>-->
-<!--		</snapshotRepository>-->
-<!--		<repository>-->
-<!--			<id>dev-azure-com-jaspervdbijl-jaspervdbijl</id>-->
-<!--			<url>https://pkgs.dev.azure.com/jaspervdbijl/_packaging/jaspervdbijl/maven/v1</url>-->
-<!--		</repository>-->
-<!--	</distributionManagement>-->
-
-<!--	<repositories>-->
-<!--		<repository>-->
-<!--			<id>dev-azure-com-jaspervdbijl-jaspervdbijl</id>-->
-<!--			<url>https://pkgs.dev.azure.com/jaspervdbijl/_packaging/jaspervdbijl/maven/v1</url>-->
-<!--			<releases>-->
-<!--				<enabled>true</enabled>-->
-<!--			</releases>-->
-<!--			<snapshots>-->
-<!--				<enabled>true</enabled>-->
-<!--			</snapshots>-->
-<!--		</repository>-->
-<!--	</repositories>-->
-
-
 </project>
