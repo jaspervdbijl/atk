@@ -1,14 +1,11 @@
 package com.acutus.atk.reflection;
 
-import lombok.Synchronized;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Reflect<T> {
-    private static Map<Class, ReflectFields> FIELD_MAP = new HashMap<>();
-    private static Map<Class, ReflectMethods> METHOD_MAP = new HashMap<>();
+    private static ConcurrentHashMap<Class, ReflectFields> FIELD_MAP = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Class, ReflectMethods> METHOD_MAP = new ConcurrentHashMap<>();
 
     private ReflectFields fields;
     private ReflectMethods methods;
@@ -20,8 +17,7 @@ public class Reflect<T> {
         methods = getMethods(entity.getClass());
     }
 
-    @Synchronized
-    public static synchronized ReflectFields getFields(Class type) {
+    public static ReflectFields getFields(Class type) {
         if (!FIELD_MAP.containsKey(type)) {
             FIELD_MAP.put(type, new ReflectFields(type));
         }
@@ -36,7 +32,6 @@ public class Reflect<T> {
         }
     }
 
-    @Synchronized
     public static ReflectMethods getMethods(Class type) {
         if (!METHOD_MAP.containsKey(type)) {
             METHOD_MAP.put(type, new ReflectMethods(type));
@@ -55,7 +50,6 @@ public class Reflect<T> {
     public List<String> getNames() {
         return fields.getNames();
     }
-
 
 
 }
