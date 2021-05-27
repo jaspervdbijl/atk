@@ -104,7 +104,10 @@ public class Strings extends ArrayList<String> {
     }
 
     public Strings removeDuplicates() {
-        return stream().distinct().collect(Collectors.toCollection(Strings::new));
+        List<String> collection = stream().distinct().collect(Collectors.toList());
+        clear();
+        addAll(collection);
+        return this;
     }
 
     public Strings prepend(String value) {

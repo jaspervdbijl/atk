@@ -110,11 +110,14 @@ public class AtkProcessor extends AbstractProcessor {
 
     protected Strings getImports(Element element) {
         Strings imports =
-                Strings.asList("import com.acutus.atk.entity.*", "import static com.acutus.atk.util.AtkUtil.handle",
-                        "import java.util.stream.Collectors", "import java.lang.reflect.Field",
-                        "import com.acutus.atk.reflection.Reflect");
+                Strings.asList(
+                        "import com.acutus.atk.entity.*;\n",
+                        "import static com.acutus.atk.util.AtkUtil.handle;\n",
+                        "import java.util.stream.Collectors;\n",
+                        "import java.lang.reflect.Field;\n",
+                        "import com.acutus.atk.reflection.Reflect;\n");
 
-        imports.addAll(getDaoClass(element).stream().map(atk -> String.format("import %s", atk.getFirst().toString())).
+        imports.addAll(getDaoClass(element).stream().map(atk -> String.format("import %s;\n", atk.getFirst().toString())).
                 collect(Collectors.toCollection(Strings::new)));
 
         imports.addAll(getImportStatements(element));
@@ -136,7 +139,7 @@ public class AtkProcessor extends AbstractProcessor {
     public Strings getImportStatements(Element element) {
         TreePath tree = Trees.instance(processingEnv).getPath(element);
         return new Strings(tree.getCompilationUnit().getImports().stream().
-                map(i -> i.toString().replace(";", "").replaceAll("\n", "")).collect(Collectors.toSet()));
+                map(i -> i.toString()).collect(Collectors.toSet()));
     }
 
     public Strings getInterfaces(Element element) {
@@ -362,7 +365,7 @@ public class AtkProcessor extends AbstractProcessor {
 
         Strings entity = new DebugStrings();
         entity.add(getPackage(className, element) + ";\n");
-        entity.add(getImports(element).append(";\n").toString("").replaceAll(";;", ";").replaceAll("\n\n", "\n"));
+        entity.add(getImports(element).append("\n").toString("").replaceAll(";;", ";").replaceAll("\n\n", "\n"));
         entity.add(getClassNameLine(element) + "\n");
         entity.add(getStaticFields(element).append(";\n").toString(""));
         entity.add(getConstructors(element).prepend("\t").append("\n").toString(""));
