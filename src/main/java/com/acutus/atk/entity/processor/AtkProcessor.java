@@ -3,6 +3,7 @@ package com.acutus.atk.entity.processor;
 import com.acutus.atk.reflection.Reflect;
 import com.acutus.atk.util.Strings;
 import com.acutus.atk.util.collection.Four;
+//import com.google.auto.service.AutoService;
 import com.google.auto.service.AutoService;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
@@ -111,11 +112,11 @@ public class AtkProcessor extends AbstractProcessor {
     protected Strings getImports(Element element) {
         Strings imports =
                 Strings.asList(
-                        "import com.acutus.atk.entity.*;\n",
-                        "import static com.acutus.atk.util.AtkUtil.handle;\n",
-                        "import java.util.stream.Collectors;\n",
-                        "import java.lang.reflect.Field;\n",
-                        "import com.acutus.atk.reflection.Reflect;\n");
+                        "import com.acutus.atk.entity.*",
+                        "import static com.acutus.atk.util.AtkUtil.handle",
+                        "import java.util.stream.Collectors",
+                        "import java.lang.reflect.Field",
+                        "import com.acutus.atk.reflection.Reflect");
 
         imports.addAll(getDaoClass(element).stream().map(atk -> String.format("import %s;\n", atk.getFirst().toString())).
                 collect(Collectors.toCollection(Strings::new)));
@@ -365,7 +366,7 @@ public class AtkProcessor extends AbstractProcessor {
 
         Strings entity = new DebugStrings();
         entity.add(getPackage(className, element) + ";\n");
-        entity.add(getImports(element).append("\n").toString("").replaceAll(";;", ";").replaceAll("\n\n", "\n"));
+        entity.add(getImports(element).append(";\n").toString("").replaceAll("\n\n", "\n"));
         entity.add(getClassNameLine(element) + "\n");
         entity.add(getStaticFields(element).append(";\n").toString(""));
         entity.add(getConstructors(element).prepend("\t").append("\n").toString(""));
