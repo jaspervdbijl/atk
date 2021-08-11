@@ -20,6 +20,7 @@ import javax.tools.JavaFileObject;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.List;
@@ -41,17 +42,33 @@ public class AtkProcessor extends AbstractProcessor {
         super();
     }
 
+    protected static <T> T jbUnwrap(Class<? extends T> iface, T wrapper) {
+        if (true) return wrapper;
+        T unwrapped = null;
+        try {
+            final Class<?> apiWrappers = wrapper.getClass().getClassLoader().loadClass("org.jetbrains.jps.javac.APIWrappers");
+            final Method unwrapMethod = apiWrappers.getDeclaredMethod("unwrap", Class.class, Object.class);
+            unwrapped = iface.cast(unwrapMethod.invoke(null, iface, wrapper));
+        }
+        catch (Throwable ignored) {}
+        return unwrapped != null? unwrapped : wrapper;
+    }
+
+    protected ProcessingEnvironment getProcessingEnv() {
+        return jbUnwrap(ProcessingEnvironment.class, processingEnv);
+    }
+
     protected void warning(String msg) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, msg);
+        getProcessingEnv().getMessager().printMessage(Diagnostic.Kind.WARNING, msg);
     }
 
     protected void error(String msg) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, msg);
+        getProcessingEnv().getMessager().printMessage(Diagnostic.Kind.ERROR, msg);
         throw new RuntimeException(msg);
     }
 
     protected void info(String msg) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, msg);
+        getProcessingEnv().getMessager().printMessage(Diagnostic.Kind.NOTE, msg);
     }
 
     public Stream<? extends Element> getFields(Element root) {
@@ -138,7 +155,7 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     public Strings getImportStatements(Element element) {
-        TreePath tree = Trees.instance(processingEnv).getPath(element);
+        TreePath tree = Trees.instance(getProcessingEnv()).getPath(element);
         return new Strings(tree.getCompilationUnit().getImports().stream().
                 map(i -> i.toString()).collect(Collectors.toSet()));
     }
@@ -169,7 +186,7 @@ public class AtkProcessor extends AbstractProcessor {
         PackageElement packageElement;
         String packageName = className.substring(0, className.lastIndexOf("."));
         do {
-            packageElement = processingEnv.getElementUtils().getPackageElement(packageName);
+            packageElement = getProcessingEnv().getElementUtils().getPackageElement(packageName);
             packageName = packageName.substring(0, packageName.lastIndexOf("."));
 
         } while (packageElement == null);
@@ -497,7 +514,7 @@ public class AtkProcessor extends AbstractProcessor {
     @SneakyThrows
     protected void writeFile(String className, String source) {
 
-        JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(className);
+        JavaFileObject builderFile = getProcessingEnv().getFiler().createSourceFile(className);
 
         try (PrintWriter out = new PrintWriter(builderFile.openWriter())) {
             out.print(source);
