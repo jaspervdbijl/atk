@@ -4,6 +4,7 @@ import com.acutus.atk.util.call.CallNilRet;
 import lombok.SneakyThrows;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -103,6 +104,12 @@ public class StringUtils {
         } else {
             return text;
         }
+    }
+
+    public static String upperCaseToNormalText(String upperCase) {
+        return Arrays.stream(upperCase.split("_"))
+                .map(s -> s.length() > 0 ? s.substring(0,1).toUpperCase()+s.substring(1).toLowerCase() : s)
+                .reduce((s1,s2) -> s2+" " +s2).get();
     }
 
 
