@@ -74,7 +74,7 @@ public class Timer extends ArrayList{
 
         @Override
         public String processed(int processed) {
-            return name + ": processed " + (processed / (duration/1000)) +" ps";
+            return duration > 0 ? name + ": processed " + (processed / (duration/1000.0)) +" ps" : "na";
         }
     }
 
