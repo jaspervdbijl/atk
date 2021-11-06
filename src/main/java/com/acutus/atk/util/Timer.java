@@ -65,16 +65,16 @@ public class Timer extends ArrayList{
         private long duration;
 
         public String sec() {
-            return name + " took " + (duration / 1000);
+            return name + " took " + (duration / 1000) + " secs";
         }
 
         public String milli() {
-            return name + " took " + (duration);
+            return name + " took " + (duration) + " milli";
         }
 
         @Override
         public String processed(int processed) {
-            return name + ": processed " + ((duration/1000) / processed) +" per second";
+            return name + ": processed " + (processed / (duration/1000)) +" ps";
         }
     }
 
