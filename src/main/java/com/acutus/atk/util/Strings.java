@@ -15,6 +15,10 @@ import static java.util.stream.Collectors.toList;
 @NoArgsConstructor
 public class Strings extends ArrayList<String> {
 
+    public Strings(String value) {
+        add(value);
+    }
+
     public Strings(Collection<String> collection) {
         addAll(collection);
     }
