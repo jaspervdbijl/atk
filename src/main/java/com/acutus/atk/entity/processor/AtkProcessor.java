@@ -167,6 +167,7 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected Element getClassElement(String className) {
+        className = className.replace(".class","");
         for (Element element : getPackageElement(className).getEnclosedElements()) {
             if (className.endsWith(element.getSimpleName().toString())) {
                 return element;
@@ -187,7 +188,7 @@ public class AtkProcessor extends AbstractProcessor {
         String packageName = className.substring(0, className.lastIndexOf("."));
         do {
             packageElement = getProcessingEnv().getElementUtils().getPackageElement(packageName);
-            packageName = packageName.substring(0, packageName.lastIndexOf("."));
+            packageName = packageName.contains(".") ? packageName.substring(0, packageName.lastIndexOf(".")) : null;
 
         } while (packageElement == null);
 
@@ -269,9 +270,11 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected List<String> extractDaoClassNames(String atkMirror) {
-        atkMirror = atkMirror.substring(atkMirror.indexOf("daoClass=") + "daoClass=".length());
-        atkMirror = atkMirror.contains(", ") ? atkMirror.substring(0, atkMirror.indexOf(", ")) : atkMirror.substring(atkMirror.indexOf(")"));
-        return !atkMirror.isEmpty() ? Arrays.asList(atkMirror.split(",")) : List.of();
+        atkMirror = atkMirror.substring(atkMirror.indexOf("daoClass={") + "daoClass={".length());
+        atkMirror = atkMirror.substring(0,atkMirror.indexOf("}"));
+        return !atkMirror.isEmpty()
+                ? Arrays.asList(atkMirror.split(",")).stream().map(s -> s.trim()).collect(Collectors.toList())
+                : List.of();
     }
 
     protected List<Four<Element, Atk.Match, Boolean, String[]>> getDaoClass(Element element) {
