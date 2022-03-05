@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class One<A> extends Collectable {
 
+    @Setter
     private A a;
 
     public A getFirst() {
