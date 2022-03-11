@@ -277,7 +277,7 @@ public class AtkProcessor extends AbstractProcessor {
         if (atkMirror.startsWith("{")) {
             atkMirror = atkMirror.substring(1,atkMirror.indexOf("}"));
         } else {
-            atkMirror = atkMirror.substring(0,atkMirror.contains(",") ? atkMirror.indexOf(",") : atkMirror.indexOf(")"));
+            atkMirror = atkMirror.substring(0,atkMirror.contains(", ") ? atkMirror.indexOf(", ") : atkMirror.indexOf(")"));
         }
         return !atkMirror.isEmpty()
                 ? Arrays.asList(atkMirror.split(",")).stream().map(s -> s.trim()).collect(Collectors.toList())
