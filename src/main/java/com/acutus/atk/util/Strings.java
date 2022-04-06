@@ -166,6 +166,15 @@ public class Strings extends ArrayList<String> {
         return getInsideIndex(value).isPresent();
     }
 
+    /**
+     * returns all the indexes of entries where value starts with the entry
+     * @param value
+     * @return
+     */
+    public List<Integer> startsWith(String value) {
+        return IntStream.range(0,size()).filter(i -> value.startsWith(get(i))).mapToObj(i -> Integer.valueOf(i)).collect(toList());
+    }
+
     public boolean containsIgnoreCase(String value) {
         return toLower().contains(value.toLowerCase());
     }

@@ -18,6 +18,10 @@ public class One<A> extends Collectable {
         return a;
     }
 
+    public boolean isPresent() {
+        return a != null;
+    }
+
     @Override
     public One<A> initFromList(List values) {
         Assert.isTrue(!values.isEmpty(), "Empty list");
