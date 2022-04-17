@@ -8,7 +8,7 @@ import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class Seven<A, B, C, D, E, F, G> extends Collectable {
+public class Tuple7<A, B, C, D, E, F, G> extends Collectable {
 
     private A a;
     private B b;

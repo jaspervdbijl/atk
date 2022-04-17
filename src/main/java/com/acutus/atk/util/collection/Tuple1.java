@@ -9,7 +9,7 @@ import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class One<A> extends Collectable {
+public class Tuple1<A> extends Collectable {
 
     @Setter
     private A a;
@@ -23,7 +23,7 @@ public class One<A> extends Collectable {
     }
 
     @Override
-    public One<A> initFromList(List values) {
+    public Tuple1<A> initFromList(List values) {
         Assert.isTrue(!values.isEmpty(), "Empty list");
         this.a = (A) values.get(0);
         return this;

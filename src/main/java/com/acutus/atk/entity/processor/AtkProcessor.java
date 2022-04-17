@@ -2,7 +2,7 @@ package com.acutus.atk.entity.processor;
 
 import com.acutus.atk.reflection.Reflect;
 import com.acutus.atk.util.Strings;
-import com.acutus.atk.util.collection.Four;
+import com.acutus.atk.util.collection.Tuple4;
 //import com.google.auto.service.AutoService;
 import com.google.auto.service.AutoService;
 import com.sun.source.util.TreePath;
@@ -284,12 +284,12 @@ public class AtkProcessor extends AbstractProcessor {
                 : List.of();
     }
 
-    protected List<Four<Element, Atk.Match, Boolean, String[]>> getDaoClass(Element element) {
+    protected List<Tuple4<Element, Atk.Match, Boolean, String[]>> getDaoClass(Element element) {
         Atk atk = element.getAnnotation(Atk.class);
         return atk == null || extractDaoClassNames(atk.toString()).isEmpty()
                 ? List.of()
                 : extractDaoClassNames(atk.toString()).stream()
-                .map(c -> new Four<>(getClassElement(c), atk.daoMatch(), atk.daoCopyAll(), atk.daoIgnore())).collect(Collectors.toList());
+                .map(c -> new Tuple4<>(getClassElement(c), atk.daoMatch(), atk.daoCopyAll(), atk.daoIgnore())).collect(Collectors.toList());
     }
 
     private Optional<? extends Element> getRefDaoField(Element element, Element field) {
@@ -335,7 +335,7 @@ public class AtkProcessor extends AbstractProcessor {
 
     protected Strings getDaoGetterAndSetter(Element element, boolean getter) {
         Strings values = new Strings();
-        for (Four<Element, Atk.Match, Boolean, String[]> atk : getDaoClass(element)) {
+        for (Tuple4<Element, Atk.Match, Boolean, String[]> atk : getDaoClass(element)) {
             assertDaoFields(element, atk.getFirst(), atk.getSecond(), atk.getFourth());
             String cName = atk.getFirst().getSimpleName().toString();
             String fName = atk.getFirst().getSimpleName().toString().substring(0, 1).toLowerCase() + atk.getFirst().getSimpleName().toString().substring(1);
