@@ -175,6 +175,10 @@ public class Strings extends ArrayList<String> {
         return IntStream.range(0,size()).filter(i -> value.startsWith(get(i))).mapToObj(i -> Integer.valueOf(i)).collect(toList());
     }
 
+    public List<Integer> endsWith(String value) {
+        return IntStream.range(0,size()).filter(i -> value.endsWith(get(i))).mapToObj(i -> Integer.valueOf(i)).collect(toList());
+    }
+
     public boolean containsIgnoreCase(String value) {
         return toLower().contains(value.toLowerCase());
     }
