@@ -116,6 +116,7 @@ public class AtkUtil {
         }
     }
 
+    
     public static String getHumanFriendlyName(String name) {
         name = name.replaceAll("[^A-Za-z]"," ");
         return Arrays.stream(name.split(" ")).map(n -> n.substring(0,1).toUpperCase() + n.substring(1).toLowerCase()).reduce((a, b) -> a+" " + b).get();
