@@ -16,7 +16,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>11</java.version>
 		<auto-service.version>1.0</auto-service.version>
-		<lombok.version>1.18.20</lombok.version>
+		<lombok.version>1.18.24</lombok.version>
 	</properties>
 
 	<dependencies>
