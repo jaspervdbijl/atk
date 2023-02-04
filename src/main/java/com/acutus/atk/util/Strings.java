@@ -217,7 +217,7 @@ public class Strings extends ArrayList<String> {
     }
 
     public static void main(String[] args) {
-        System.out.println(Strings.asList(null,"","Heloo").removeEmpty().toString());
+        System.out.println(Strings.asList(null,null,"",null,"","Heloo").removeEmpty().toString());
     }
 
 }
