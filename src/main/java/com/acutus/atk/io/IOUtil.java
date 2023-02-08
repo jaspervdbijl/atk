@@ -1,8 +1,9 @@
 package com.acutus.atk.io;
 
+import com.acutus.atk.util.Strings;
+
 import java.io.*;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.*;
 
 public class IOUtil {
 
@@ -49,7 +50,7 @@ public class IOUtil {
      */
     public static void copy(InputStream is, OutputStream os) throws IOException {
         byte buffer[] = new byte[1024];
-        for (int r = is.read(buffer); r != -1;r = is.read(buffer)) {
+        for (int r = is.read(buffer); r != -1; r = is.read(buffer)) {
             os.write(buffer, 0, r);
         }
     }
@@ -81,6 +82,34 @@ public class IOUtil {
         try (GZIPInputStream fis = new GZIPInputStream(zip)) {
             return readFully(fis);
         }
+    }
+
+    public static File zip(File files[], String fname[]) throws ZipException, IOException {
+        File zfile = File.createTempFile("data", ".zip");
+        try (ZipOutputStream zostream = new ZipOutputStream(new FileOutputStream(zfile))) {
+            zostream.setLevel(Deflater.BEST_COMPRESSION);
+            int cnt = 0;
+            for (File file : files) {
+                ZipEntry entry = new ZipEntry(fname[cnt++]);
+                zostream.putNextEntry(new ZipEntry(entry.getName()));
+                try (FileInputStream fis = new FileInputStream(file)) {
+                    copy(fis, zostream);
+                }
+            }
+        }
+        return zfile;
+    }
+
+    public static File zip(File file[]) throws IOException {
+        Strings lst = new Strings();
+        for (File f : file) {
+            lst.add(f.getName());
+        }
+        return zip(file, lst.toArray(new String[]{}));
+    }
+
+    public static File zip(File file) throws IOException {
+        return zip(new File[]{file}, new String[]{file.getName()});
     }
 
 }
