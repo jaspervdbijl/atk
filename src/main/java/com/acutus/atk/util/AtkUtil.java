@@ -28,10 +28,10 @@ public class AtkUtil {
     }
 
     @SneakyThrows
-    public static void handle(CallNil call, CallOne<Exception> handle) {
+    public static void handle(CallNil call, CallOne<Throwable> handle) {
         try {
             call.call();
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             log.warn(ex.getMessage(),ex);
             handle.call(ex);
         }
