@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 @Slf4j
 public class ClsFile implements Closeable  {
 
+  
   private File file;
 
   public ClsFile(File file) {
