@@ -3,6 +3,7 @@ package com.acutus.atk.util;
 import com.acutus.atk.util.call.CallNil;
 import com.acutus.atk.util.call.CallNilRet;
 import com.acutus.atk.util.call.CallOne;
+import com.acutus.atk.util.call.CallTwo;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,6 +14,8 @@ import java.lang.reflect.ParameterizedType;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import static com.acutus.atk.util.StringUtils.subLength;
 
@@ -25,15 +28,14 @@ public class AtkUtil {
     }
 
     @SneakyThrows
-    public static void handle(CallNil call, CallOne<Exception> handle) {
+    public static void handle(CallNil call, CallOne<Throwable> handle) {
         try {
             call.call();
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             log.warn(ex.getMessage(),ex);
             handle.call(ex);
         }
     }
-
 
     @SneakyThrows
     public static <T, R> R handle(CallNilRet<R> call) {
@@ -120,6 +122,11 @@ public class AtkUtil {
     public static String getHumanFriendlyName(String name) {
         name = name.replaceAll("[^A-Za-z]"," ");
         return Arrays.stream(name.split(" ")).map(n -> n.substring(0,1).toUpperCase() + n.substring(1).toLowerCase()).reduce((a, b) -> a+" " + b).get();
+    }
+
+    public static <T> void idxStream(Stream<T> s, CallTwo<Integer, T> call) {
+        AtomicInteger i = new AtomicInteger(0);
+        s.forEach(a -> handle(() -> call.call(i.getAndIncrement(),a)));
     }
 
 
