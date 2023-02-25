@@ -1,7 +1,7 @@
 package com.acutus.atk.entity;
 
 import com.acutus.atk.entity.processor.AtkEdit;
-import com.acutus.atk.io.IOUtil;
+import com.acutus.atk.util.IOUtil;
 import com.acutus.atk.reflection.Reflect;
 import com.acutus.atk.reflection.ReflectFields;
 import lombok.SneakyThrows;
