@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class BeanHelper {
 
-    
+
     public static final Map<Class, CallOneRet<String, Object>> DECODE_MAP = new HashMap<Class, CallOneRet<String, Object>>() {{
         put(String.class, s -> s);
         put(Integer.class, s -> Integer.parseInt(s));
