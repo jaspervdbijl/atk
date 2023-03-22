@@ -8,6 +8,8 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.acutus.atk.beans.BeanHelper.decode;
 import static com.acutus.atk.beans.BeanHelper.encode;
@@ -24,6 +26,8 @@ public class AtkField<T,R> {
     private R entity;
 
     private com.acutus.atk.entity.processor.AtkField atkField;
+
+    private List<ChangeListener> changeListeners = new ArrayList<>();
 
     @Getter @Setter
     private boolean audit,changed,set,ignore;
@@ -44,11 +48,20 @@ public class AtkField<T,R> {
         return (Class<T>) field.getType();
     }
 
+    public void addListener(ChangeListener<T> tChangeListener) {
+        this.changeListeners.add(tChangeListener);
+    }
+
+    public void removeListener(ChangeListener<T> tChangeListener) {
+        this.changeListeners.remove(tChangeListener);
+    }
+
     @SneakyThrows
     public R set(T value) {
         if (audit) {
             oldValue = (T) field.get(entity);
         }
+        changeListeners.stream().forEach(c -> AtkUtil.handle(() -> c.changed((T) field.get(entity),value)));
         // transform value if
         changed = !AtkUtil.equals(field.get(entity),value);
         set = true;
