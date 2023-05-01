@@ -21,4 +21,8 @@ public class TimeHelper {
         return LocalDate.ofInstant(date.toInstant(),defaultZoneId);
     }
 
+    public static LocalDateTime toLocalDateTime(Date date) {
+        return LocalDateTime.ofInstant(date.toInstant(),defaultZoneId);
+    }
+
 }
