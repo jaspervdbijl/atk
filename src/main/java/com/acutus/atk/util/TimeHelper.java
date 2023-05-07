@@ -1,5 +1,7 @@
 package com.acutus.atk.util;
 
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -15,6 +17,10 @@ public class TimeHelper {
 
     public static Date toDate(LocalDateTime localDateTime) {
         return localDateTime != null ? Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()) : null;
+    }
+
+    public static Timestamp toTimestamp(LocalDateTime localDateTime) {
+        return localDateTime != null ? Timestamp.valueOf(localDateTime) : null;
     }
 
     public static LocalDate toLocalDate(Date date) {
