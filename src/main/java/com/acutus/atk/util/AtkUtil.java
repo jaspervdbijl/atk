@@ -129,6 +129,12 @@ public class AtkUtil {
         s.forEach(a -> handle(() -> call.call(i.getAndIncrement(),a)));
     }
 
-
+    public static String leftPad(String value, char pad, int length) {
+        StringBuilder sb = new StringBuilder(value);
+        while (sb.length() < length) {
+            sb.insert(0,pad);
+        }
+        return sb.toString();
+    }
 
 }
