@@ -34,7 +34,7 @@ import static com.acutus.atk.util.StringUtils.bytesToHex;
 
 @SupportedAnnotationTypes(
         "com.acutus.atk.entity.processor.Atk")
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_17)
 @AutoService(Processor.class)
 public class AtkProcessor extends AbstractProcessor {
 
