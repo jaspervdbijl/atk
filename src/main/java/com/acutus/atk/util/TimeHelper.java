@@ -5,9 +5,12 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class TimeHelper {
+
+    public static final DateTimeFormatter yyyyMMddFormat = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     private static ZoneId defaultZoneId = ZoneId.systemDefault();
 
