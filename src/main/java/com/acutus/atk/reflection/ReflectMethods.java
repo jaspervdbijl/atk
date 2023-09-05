@@ -32,7 +32,7 @@ public class ReflectMethods implements Iterable<Method> {
 
     public ReflectMethods filter(boolean inverse, String... names) {
         return new ReflectMethods(methods.stream().filter(f -> !inverse == Arrays.stream(names)
-                .filter(n -> f.getName().equalsIgnoreCase(n)).findFirst().isPresent())
+                        .filter(n -> f.getName().equalsIgnoreCase(n)).findFirst().isPresent())
                 .collect(Collectors.toList()));
     }
 
@@ -55,6 +55,17 @@ public class ReflectMethods implements Iterable<Method> {
         for (Method method : methods) {
             if (ignoreCase ? method.getName().equalsIgnoreCase(name) : method.getName().equals(name)) {
                 return method;
+            }
+        }
+        return null;
+    }
+
+    public Method get(boolean ignoreCase, String name, Class... parameters) {
+        for (Method method : methods) {
+            if (ignoreCase ? method.getName().equalsIgnoreCase(name) : method.getName().equals(name)) {
+                if (method.getParameterCount() == parameters.length &&
+                        !IntStream.range(0, parameters.length).filter(i -> method.getParameterTypes().equals(parameters[i])).findFirst().isPresent())
+                    return method;
             }
         }
         return null;
@@ -103,7 +114,7 @@ public class ReflectMethods implements Iterable<Method> {
     }
 
     public ReflectMethods filterStatic(boolean inverse) {
-        return new ReflectMethods(methods.stream().filter(m -> Modifier.isStatic(m.getModifiers()) != inverse) .collect(Collectors.toList()));
+        return new ReflectMethods(methods.stream().filter(m -> Modifier.isStatic(m.getModifiers()) != inverse).collect(Collectors.toList()));
     }
 
     public ReflectMethods filterStatic() {
@@ -112,8 +123,8 @@ public class ReflectMethods implements Iterable<Method> {
 
     public ReflectMethods filterParams(Class... params) {
         return new ReflectMethods(methods.stream().filter(m ->
-                paramEquals(Arrays.stream(m.getParameters()).map(p -> p.getType()).collect(Collectors.toList())
-                        , Arrays.asList((params == null ? new Class[]{} : params))))
+                        paramEquals(Arrays.stream(m.getParameters()).map(p -> p.getType()).collect(Collectors.toList())
+                                , Arrays.asList((params == null ? new Class[]{} : params))))
                 .collect(Collectors.toList()));
     }
 
@@ -157,7 +168,6 @@ public class ReflectMethods implements Iterable<Method> {
     public Collection<Method> toCollection() {
         return new ArrayList<>(methods);
     }
-
 
 
 }
