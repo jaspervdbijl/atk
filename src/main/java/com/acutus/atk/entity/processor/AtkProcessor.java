@@ -17,11 +17,13 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -388,6 +390,13 @@ public class AtkProcessor extends AbstractProcessor {
     protected void validate(Element element) {
     }
 
+    public String getHashCode(Element element, Strings entity) throws NoSuchAlgorithmException, IOException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        md.update(entity.toString("").getBytes());
+        byte[] digest = md.digest();
+        return bytesToHex(digest).toUpperCase();
+    }
+
     @SneakyThrows
     protected Strings getElement(RoundEnvironment roundEnv, String className, Element element) {
 
@@ -413,10 +422,7 @@ public class AtkProcessor extends AbstractProcessor {
                 });
 
         // add md5 hash
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(entity.toString("").getBytes());
-        byte[] digest = md.digest();
-        String hash = bytesToHex(digest).toUpperCase();
+        String hash = getHashCode(element,entity);
 
         entity.add(String.format("\t@Override\n\tpublic String getMd5Hash() {return \"%s\";}", hash));
         entity.add("}");
