@@ -425,6 +425,8 @@ public class AtkProcessor extends AbstractProcessor {
         String hash = getHashCode(element,entity);
 
         entity.add(String.format("\t@Override\n\tpublic String getMd5Hash() {return \"%s\";}", hash));
+        // add compile time used in FE
+        entity.add(String.format("\t@Override\n\tpublic String getCompileTime() {return \"%s\";}", java.time.LocalDateTime.now().toString()));
         entity.add("}");
 
         return entity;
