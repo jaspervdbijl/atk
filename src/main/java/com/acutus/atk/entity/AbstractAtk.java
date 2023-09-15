@@ -6,6 +6,7 @@ import com.acutus.atk.reflection.Reflect;
 import com.acutus.atk.reflection.ReflectFields;
 import lombok.SneakyThrows;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -103,6 +104,14 @@ public class AbstractAtk<T extends AbstractAtk, O> {
 
     public String getMd5Hash() {
         throw new RuntimeException("Not implemented");
+    }
+
+    public String getCompileTime() {
+        throw new RuntimeException("Not implemented");
+    }
+
+    public LocalDateTime getCompileTimeAsTime() {
+        return LocalDateTime.parse(getCompileTime());
     }
 
 }
