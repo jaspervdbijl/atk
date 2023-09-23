@@ -418,6 +418,7 @@ public class AtkProcessor extends AbstractProcessor {
                     entity.add("\t" + getField(element, e) + "\n");
                     entity.add("\t" + getAtkField(element, e) + "\n");
                     entity.add("\t" + getGetter(element, e) + "\n");
+                    entity.add("\t" + getGetterNullsafe(element, e) + "\n");
                     entity.add("\t" + getSetter(element, e) + "\n");
                 });
 
@@ -499,7 +500,7 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected String getAtkField(Element parent, Element e) {
-        return String.format("public transient AtkField<%s,%s> _%s = new AtkField<>(%s,this);"
+        return String.format("private transient AtkField<%s,%s> _%s = new AtkField<>(%s,this);"
                 , e.asType().toString(), getClassName(parent), e.getSimpleName()
                 , String.format("Reflect.getFields(%s.class).getByName(\"%s\").get()"
                         , getClassName(parent), e.getSimpleName())
@@ -520,14 +521,36 @@ public class AtkProcessor extends AbstractProcessor {
                 , e.getSimpleName().toString(), e.getSimpleName().toString());
     }
 
-    protected String getGetter(Element parent, Element e) {
-        return String.format("public %s get%s() {"
-                        + "return this._%s.get();"
+    protected String getGetterTemplate(Element parent, Element e, String methodPostFix, String center) {
+        String type =e.asType().toString();
+        return String.format("public %s get%s"+methodPostFix+"() {"
+                        + center
                         + "};"
-                , e.asType().toString(), methodName(e.getSimpleName().toString())
-                , e.getSimpleName().toString());
+                , e.asType().toString(), methodName(e.getSimpleName().toString()));
+    }
+    protected String getGetter(Element parent, Element e) {
+        return getGetterTemplate(parent,e,"",String.format("return this._%s.get();",e.getSimpleName().toString()));
     }
 
+    protected String getGetterNullsafe(Element parent, Element e) {
+        String nullSafe = "return this._"+e.getSimpleName().toString()+".get();";
+        if (e.asType().toString().startsWith("java.lang")) {
+            try {
+                Class type = Class.forName(e.asType().toString());
+                if (Number.class.isAssignableFrom(type)) {
+                    nullSafe = "return " + e.getSimpleName().toString() + " == null ? 0 : " + e.getSimpleName().toString()+";";
+                }
+                if (String.class.equals(type)) {
+                    nullSafe = "return " + e.getSimpleName().toString() + " == null ? \"\" : " + e.getSimpleName().toString()+";";
+                }
+                if (Boolean.class.equals(type)) {
+                    nullSafe = "return " + e.getSimpleName().toString() + " == null ? false : " + e.getSimpleName().toString()+";";
+                }
+            } catch (ClassNotFoundException nfe) {
+            }
+        }
+        return getGetterTemplate(parent,e, "NullSafe",nullSafe);
+    }
 
     @SneakyThrows
     protected void writeFile(String className, String source) {
