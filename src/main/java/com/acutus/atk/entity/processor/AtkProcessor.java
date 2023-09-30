@@ -1,15 +1,20 @@
 package com.acutus.atk.entity.processor;
 
 import com.acutus.atk.reflection.Reflect;
+import static com.acutus.atk.util.StringUtils.bytesToHex;
 import com.acutus.atk.util.Strings;
 import com.acutus.atk.util.collection.Tuple4;
-//import com.google.auto.service.AutoService;
 import com.google.auto.service.AutoService;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 import lombok.SneakyThrows;
 
-import javax.annotation.processing.*;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.Processor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -31,8 +36,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import static com.acutus.atk.util.StringUtils.bytesToHex;
 
 @SupportedAnnotationTypes(
         "com.acutus.atk.entity.processor.Atk")
