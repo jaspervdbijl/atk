@@ -208,9 +208,9 @@ public class Strings extends ArrayList<String> {
         add(stream);
     }
 
-    public Strings sublist(int start) {
+    public Strings sublist(int start, int end) {
         Strings str = new Strings();
-        for (int i = 1;i < size();i++) {
+        for (int i = start;i < end;i++) {
             str.add(get(i));
         }
         return str;
