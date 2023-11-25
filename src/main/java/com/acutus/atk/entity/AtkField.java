@@ -128,6 +128,7 @@ public class AtkField<T,R> {
                 get().equals(field.get()));
     }
 
+
     public String toString() {
         return String.format("%s: %s",getField().getName(),""+get());
     }
