@@ -6,6 +6,7 @@ import com.acutus.atk.reflection.Reflect;
 import com.acutus.atk.reflection.ReflectFields;
 import lombok.SneakyThrows;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,7 +17,7 @@ import static com.acutus.atk.util.AtkUtil.handle;
 // T the current instance and O is the original dao entity
 public class AbstractAtk<T extends AbstractAtk, O> {
 
-    private static Map<String,String> CACHED_RESOURCES = new HashMap<>();
+    private static Map<String, String> CACHED_RESOURCES = new HashMap<>();
 
     @SneakyThrows
     public static String getCachedResource(String resource) {
@@ -57,7 +58,7 @@ public class AbstractAtk<T extends AbstractAtk, O> {
     @SneakyThrows
     public O toBase() {
         O base = (O) getBaseClass().getConstructor().newInstance();
-        getRefFields().copyMatchingTo(this, Reflect.getFields(base.getClass()), base,true);
+        getRefFields().copyMatchingTo(this, Reflect.getFields(base.getClass()), base, true);
         return base;
     }
 
@@ -67,15 +68,15 @@ public class AbstractAtk<T extends AbstractAtk, O> {
         ReflectFields exclFields = (exclude == null ? new AtkFieldList() : exclude).toRefFields()
                 .addAll(bFields.stream().filter(f -> f.getAnnotation(AtkEdit.class) != null)
                         .collect(Collectors.toList()));
-        bFields.copyMatchingTo(base, getRefFields(), this, exclFields,copyNull);
+        bFields.copyMatchingTo(base, getRefFields(), this, exclFields, copyNull);
         // update set state
         bFields.stream().forEach(f -> handle(() ->
-            getFields().getByName(f.getName()).ifPresent(myField -> ((AtkField)myField).setSet(true))));
+                getFields().getByName(f.getName()).ifPresent(myField -> ((AtkField) myField).setSet(true))));
         return (T) this;
     }
 
     public T initFrom(O base, AtkFieldList exclude) {
-        return initFrom(base,exclude,false);
+        return initFrom(base, exclude, false);
     }
 
     public T initFrom(O base, AtkField... exclude) {
@@ -98,9 +99,21 @@ public class AbstractAtk<T extends AbstractAtk, O> {
     }
 
     public T ignoreFields() {
-        getFields().stream().forEach(f -> ((AtkField)f).ignore());
+        getFields().stream().forEach(f -> ((AtkField) f).ignore());
         return (T) this;
     }
+
+    public T ignoreFieldsExcept(Field... fields) {
+        List<String> fieldList = Arrays.stream(fields).map(f -> f.getName()).collect(Collectors.toList());
+        getFields().stream()
+                .filter(f -> {
+                    String fName = ((AtkField) f).getField().getName();
+                    return !fieldList.contains(fName) && !fieldList.contains("_" + fName);
+                })
+                .forEach(f -> ((AtkField) f).ignore());
+        return (T) this;
+    }
+
 
     public String getMd5Hash() {
         throw new RuntimeException("Not implemented");
