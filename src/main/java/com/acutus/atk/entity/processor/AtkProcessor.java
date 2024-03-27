@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 
 @SupportedAnnotationTypes(
         "com.acutus.atk.entity.processor.Atk")
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
+@SupportedSourceVersion(SourceVersion.RELEASE_21)
 @AutoService(Processor.class)
 public class AtkProcessor extends AbstractProcessor {
 
@@ -134,13 +134,13 @@ public class AtkProcessor extends AbstractProcessor {
     protected Strings getImports(Element element) {
         Strings imports =
                 Strings.asList(
-                        "import com.acutus.atk.entity.*",
-                        "import static com.acutus.atk.util.AtkUtil.handle",
-                        "import java.util.stream.Collectors",
-                        "import java.lang.reflect.Field",
-                        "import com.acutus.atk.reflection.Reflect");
+                        "import com.acutus.atk.entity.*;",
+                        "import static com.acutus.atk.util.AtkUtil.handle;",
+                        "import java.util.stream.Collectors;",
+                        "import java.lang.reflect.Field;",
+                        "import com.acutus.atk.reflection.Reflect;");
 
-        imports.addAll(getDaoClass(element).stream().map(atk -> String.format("import %s;\n", atk.getFirst().toString())).
+        imports.addAll(getDaoClass(element).stream().map(atk -> String.format("import %s;", atk.getFirst().toString())).
                 collect(Collectors.toCollection(Strings::new)));
 
         imports.addAll(getImportStatements(element));
@@ -405,7 +405,7 @@ public class AtkProcessor extends AbstractProcessor {
 
         Strings entity = new DebugStrings();
         entity.add(getPackage(className, element) + ";\n");
-        entity.add(getImports(element).append(";\n").toString("").replaceAll("\n\n", "\n"));
+        entity.add(getImports(element).replace("\n","").toString("\n"));
         entity.add(getClassNameLine(element) + "\n");
         entity.add(getStaticFields(element).append(";\n").toString(""));
         entity.add(getConstructors(element).prepend("\t").append("\n").toString(""));

@@ -36,6 +36,17 @@ public class Strings extends ArrayList<String> {
         return new Strings(Arrays.asList(strings));
     }
 
+    public static Strings splitByLength(String value, int length) {
+        Assert.isTrue(value.length() % length == 0,"Invalid string length");
+        Strings strings = new Strings();
+        while (value.length() > length) {
+            strings.add(value.substring(0, length));
+            value = value.substring(length);
+        }
+        strings.add(value);
+        return strings;
+    }
+
     public Strings(StringTokenizer st) {
         for (; st.hasMoreTokens();) {
             add(st.nextToken());
