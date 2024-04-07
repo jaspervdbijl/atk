@@ -109,6 +109,14 @@ public class AtkUtil {
         return value != null ? value : 0.0;
     }
 
+    public static long nonNull(Long value) {
+        return value != null ? value : 0l;
+    }
+
+    public static int nonNull(Integer value) {
+        return value != null ? value : 0;
+    }
+
     public static boolean isInt(String value) {
         try {
             Integer.parseInt(value);
