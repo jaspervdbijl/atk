@@ -174,7 +174,7 @@ public class ReflectFields implements Iterable<Field> {
         return fields.stream();
     }
 
-    public Collection<Field> toCollection() {
+    public List<Field> toList() {
         return new ArrayList<>(fields);
     }
 }

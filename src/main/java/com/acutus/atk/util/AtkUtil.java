@@ -132,6 +132,17 @@ public class AtkUtil {
         return Arrays.stream(name.split(" ")).map(n -> n.substring(0,1).toUpperCase() + n.substring(1).toLowerCase()).reduce((a, b) -> a+" " + b).get();
     }
 
+    public static String getHumanFriendlyNameInsertSpace(String name) {
+        StringBuilder sb = new StringBuilder(name.replaceAll("[^A-Za-z]"," "));
+        for (int i = 1;i < sb.length();i++) {
+            if (Character.isUpperCase(sb.charAt(i))) {
+                sb.insert(i," ");
+                i++;
+            }
+        };
+        return sb.toString();
+    }
+
     public static <T> void idxStream(Stream<T> s, CallTwo<Integer, T> call) {
         AtomicInteger i = new AtomicInteger(0);
         s.forEach(a -> handle(() -> call.call(i.getAndIncrement(),a)));

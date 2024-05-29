@@ -1,7 +1,10 @@
 package com.acutus.atk.entity.processor;
 
 import com.acutus.atk.reflection.Reflect;
+
 import static com.acutus.atk.util.StringUtils.bytesToHex;
+import static com.acutus.atk.util.StringUtils.nonNullStr;
+
 import com.acutus.atk.util.Strings;
 import com.acutus.atk.util.collection.Tuple4;
 import com.google.auto.service.AutoService;
@@ -20,6 +23,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
@@ -27,6 +31,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -54,9 +59,9 @@ public class AtkProcessor extends AbstractProcessor {
             final Class<?> apiWrappers = wrapper.getClass().getClassLoader().loadClass("org.jetbrains.jps.javac.APIWrappers");
             final Method unwrapMethod = apiWrappers.getDeclaredMethod("unwrap", Class.class, Object.class);
             unwrapped = iface.cast(unwrapMethod.invoke(null, iface, wrapper));
+        } catch (Throwable ignored) {
         }
-        catch (Throwable ignored) {}
-        return unwrapped != null? unwrapped : wrapper;
+        return unwrapped != null ? unwrapped : wrapper;
     }
 
     protected ProcessingEnvironment getProcessingEnv() {
@@ -111,10 +116,12 @@ public class AtkProcessor extends AbstractProcessor {
                            RoundEnvironment roundEnv) {
 
         for (TypeElement annotation : annotations) {
-            roundEnv.getElementsAnnotatedWith(annotation).stream().
-                    forEach(e -> {
+            roundEnv.getElementsAnnotatedWith(annotation).stream()
+                    .filter(e -> e instanceof TypeElement)
+                    .map(e -> (TypeElement) e)
+                    .forEach(e -> {
                         validate(e);
-                        processElement(roundEnv, ((TypeElement) e).getQualifiedName().toString(), e);
+                        processElement(roundEnv, e.getQualifiedName().toString(), e);
                     });
         }
 
@@ -122,7 +129,7 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     @SneakyThrows
-    protected void processElement(RoundEnvironment roundEnv, String className, Element element) {
+    protected void processElement(RoundEnvironment roundEnv, String className, TypeElement element) {
         String source = getElement(roundEnv, className, element)
                 .stream()
                 .reduce((s1, s2) -> s1 + "\n" + s2)
@@ -172,7 +179,7 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected Element getClassElement(String className) {
-        className = className.replace(".class","");
+        className = className.replace(".class", "");
         for (Element element : getPackageElement(className).getEnclosedElements()) {
             if (className.endsWith(element.getSimpleName().toString())) {
                 return element;
@@ -280,9 +287,9 @@ public class AtkProcessor extends AbstractProcessor {
     protected List<String> extractDaoClassNames(String atkMirror) {
         atkMirror = atkMirror.substring(atkMirror.indexOf("daoClass=") + "daoClass=".length());
         if (atkMirror.startsWith("{")) {
-            atkMirror = atkMirror.substring(1,atkMirror.indexOf("}"));
+            atkMirror = atkMirror.substring(1, atkMirror.indexOf("}"));
         } else {
-            atkMirror = atkMirror.substring(0,atkMirror.contains(", ") ? atkMirror.indexOf(", ") : atkMirror.indexOf(")"));
+            atkMirror = atkMirror.substring(0, atkMirror.contains(", ") ? atkMirror.indexOf(", ") : atkMirror.indexOf(")"));
         }
         return !atkMirror.isEmpty()
                 ? Arrays.asList(atkMirror.split(",")).stream().map(s -> s.trim()).collect(Collectors.toList())
@@ -401,11 +408,36 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     @SneakyThrows
-    protected Strings getElement(RoundEnvironment roundEnv, String className, Element element) {
+    protected void getElement(Strings entity, RoundEnvironment roundEnv, TypeElement rootElement, TypeElement element) {
 
-        Strings entity = new DebugStrings();
+        element.getEnclosedElements().stream()
+                .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f) &&
+                        !shouldExcludeField(rootElement, f.getSimpleName().toString()))
+                .forEach(e -> {
+                    entity.add("\t" + getField(rootElement, e) + "\n");
+                    entity.add("\t" + getAtkField(rootElement, e) + "\n");
+                    entity.add("\t" + getGetter(rootElement, e) + "\n");
+                    entity.add("\t" + getGetterNullsafe(rootElement, e) + "\n");
+                    entity.add("\t" + getSetter(rootElement, e) + "\n");
+                });
+
+        // process any super classes
+        String superClassName = element.getSuperclass().toString();
+        if (!Object.class.getName().equals(superClassName)) {
+            Optional<? extends Element> e = roundEnv.getRootElements().stream().filter(s -> s.toString().equals(superClassName)).findFirst();
+            if (e.isPresent()) {
+                getElement(entity,roundEnv,element,(TypeElement) e.get());
+            }
+        }
+
+    }
+
+    @SneakyThrows
+    protected Strings getElement(RoundEnvironment roundEnv, String className, TypeElement element) {
+        Strings entity = new Strings();
+
         entity.add(getPackage(className, element) + ";\n");
-        entity.add(getImports(element).replace("\n","").toString("\n"));
+        entity.add(getImports(element).replace("\n", "").toString("\n"));
         entity.add(getClassNameLine(element) + "\n");
         entity.add(getStaticFields(element).append(";\n").toString(""));
         entity.add(getConstructors(element).prepend("\t").append("\n").toString(""));
@@ -414,27 +446,17 @@ public class AtkProcessor extends AbstractProcessor {
         entity.add(getDaoGetterAndSetter(element, false).append("\n").toString(""));
         entity.add(getDaoGetterAndSetter(element, true).append("\n").toString(""));
 
-        element.getEnclosedElements().stream()
-                .filter(f -> ElementKind.FIELD.equals(f.getKind()) && isPrimitive(f) &&
-                        !shouldExcludeField(element, f.getSimpleName().toString()))
-                .forEach(e -> {
-                    entity.add("\t" + getField(element, e) + "\n");
-                    entity.add("\t" + getAtkField(element, e) + "\n");
-                    entity.add("\t" + getGetter(element, e) + "\n");
-                    entity.add("\t" + getGetterNullsafe(element, e) + "\n");
-                    entity.add("\t" + getSetter(element, e) + "\n");
-                });
-
+        getElement(entity, roundEnv, element, element);
         // add md5 hash
-        String hash = getHashCode(element,entity);
+        String hash = getHashCode(element, entity);
 
         entity.add(String.format("\t@Override\n\tpublic String getMd5Hash() {return \"%s\";}", hash));
         // add compile time used in FE
         entity.add(String.format("\t@Override\n\tpublic String getCompileTime() {return \"%s\";}", java.time.LocalDateTime.now().toString()));
         entity.add("}");
-
         return entity;
     }
+
 
     @SneakyThrows
     private String getSuperClass(Element parent, String superClassName) {
@@ -525,34 +547,35 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected String getGetterTemplate(Element parent, Element e, String methodPostFix, String center) {
-        String type =e.asType().toString();
-        return String.format("public %s get%s"+methodPostFix+"() {"
+        String type = e.asType().toString();
+        return String.format("public %s get%s" + methodPostFix + "() {"
                         + center
                         + "};"
                 , e.asType().toString(), methodName(e.getSimpleName().toString()));
     }
+
     protected String getGetter(Element parent, Element e) {
-        return getGetterTemplate(parent,e,"",String.format("return this._%s.get();",e.getSimpleName().toString()));
+        return getGetterTemplate(parent, e, "", String.format("return this._%s.get();", e.getSimpleName().toString()));
     }
 
     protected String getGetterNullsafe(Element parent, Element e) {
-        String nullSafe = "return this._"+e.getSimpleName().toString()+".get();";
+        String nullSafe = "return this._" + e.getSimpleName().toString() + ".get();";
         if (e.asType().toString().startsWith("java.lang")) {
             try {
                 Class type = Class.forName(e.asType().toString());
                 if (Number.class.isAssignableFrom(type)) {
-                    nullSafe = "return " + e.getSimpleName().toString() + " == null ? 0 : " + e.getSimpleName().toString()+";";
+                    nullSafe = "return " + e.getSimpleName().toString() + " == null ? 0 : " + e.getSimpleName().toString() + ";";
                 }
                 if (String.class.equals(type)) {
-                    nullSafe = "return " + e.getSimpleName().toString() + " == null ? \"\" : " + e.getSimpleName().toString()+";";
+                    nullSafe = "return " + e.getSimpleName().toString() + " == null ? \"\" : " + e.getSimpleName().toString() + ";";
                 }
                 if (Boolean.class.equals(type)) {
-                    nullSafe = "return " + e.getSimpleName().toString() + " == null ? false : " + e.getSimpleName().toString()+";";
+                    nullSafe = "return " + e.getSimpleName().toString() + " == null ? false : " + e.getSimpleName().toString() + ";";
                 }
             } catch (ClassNotFoundException nfe) {
             }
         }
-        return getGetterTemplate(parent,e, "NullSafe",nullSafe);
+        return getGetterTemplate(parent, e, "NullSafe", nullSafe);
     }
 
     @SneakyThrows
