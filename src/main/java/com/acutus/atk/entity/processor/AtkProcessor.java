@@ -426,7 +426,7 @@ public class AtkProcessor extends AbstractProcessor {
         if (!Object.class.getName().equals(superClassName)) {
             Optional<? extends Element> e = roundEnv.getRootElements().stream().filter(s -> s.toString().equals(superClassName)).findFirst();
             if (e.isPresent()) {
-                getElement(entity,roundEnv,element,(TypeElement) e.get());
+                getElement(entity, roundEnv, element, (TypeElement) e.get());
             }
         }
 
@@ -536,10 +536,15 @@ public class AtkProcessor extends AbstractProcessor {
         return fieldName.substring(0, 1).toUpperCase() + (fieldName.length() > 0 ? fieldName.substring(1) : "");
     }
 
+    protected String getSetterExtra(Element parent, Element e) {
+        return "";
+    }
+
     protected String getSetter(Element parent, Element e) {
-        return String.format("public %s set%s(%s %s) {"
-                        + "this._%s.set(%s);"
-                        + "return this;"
+        return String.format("public %s set%s(%s %s) {\n"
+                        + "\tthis._%s.set(%s);"
+                        + getSetterExtra(parent, e)
+                        + "\treturn this;"
                         + "};"
                 , getClassName(parent), methodName(e.getSimpleName().toString()), e.asType().toString()
                 , e.getSimpleName().toString()
