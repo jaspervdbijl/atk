@@ -31,7 +31,8 @@ public class FieldUtil {
 
     @SneakyThrows
     public static void setHexAsBit(Object entity,String hex, boolean inverse) {
-        String binary = Strings.splitByLength(hex,2).stream().map(s -> Integer.toBinaryString(Integer.parseInt(s, 16)))
+        String binary = Strings.splitByLength(hex,2)
+                .stream().map(s -> Integer.toBinaryString(Integer.parseInt(s, 16)))
                 .reduce((a,b) -> a+b).get();
         List<Field> fields = Reflect.getFields(entity.getClass()).stream().toList();
         Assert.isTrue(fields.size() == binary.length(),"Invalid hex length");
