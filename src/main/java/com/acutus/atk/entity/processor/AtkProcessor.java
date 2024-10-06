@@ -542,8 +542,8 @@ public class AtkProcessor extends AbstractProcessor {
 
     protected String getSetter(Element parent, Element e) {
         return String.format("public %s set%s(%s %s) {\n"
-                        + "\tthis._%s.set(%s);"
                         + getSetterExtra(parent, e)
+                        + "\tthis._%s.set(%s);"
                         + "\treturn this;"
                         + "};"
                 , getClassName(parent), methodName(e.getSimpleName().toString()), e.asType().toString()
