@@ -235,8 +235,8 @@ public class AtkProcessor extends AbstractProcessor {
         }
 
         // replace Atk annotation
-        annotations = annotations.replace("@com.acutus.atk.entity.processor.Atk", "");
-        return annotations + "\n" + String.format("public class %s extends AbstractAtk<%s,%s> {",
+        annotations = annotations.trim().replace("@com.acutus.atk.entity.processor.Atk", "");
+        return annotations.replace("@","\n@") + "\n" + String.format("public class %s extends AbstractAtk<%s,%s> {",
                 getClassName(element), getClassName(element), element.getSimpleName());
     }
 
