@@ -47,26 +47,26 @@ public class Business {
 Will compare entity to DB
 If table doesn't exist or differs will generate a DDL to create or update the table (only if entity is newer than schema changes)
 
-create table business
-(
+	create table business
+	(
 	created_by varchar(255) null,
 	created_date datetime null,
 	last_modified_by varchar(255) null,
 	last_modified_date datetime null,
 	id varchar(50) not null
-		primary key,
+	primary key,
 	id_n varchar(255) null,
 	passport_n varchar(255) null,
 	passport_country varchar(255) null,
 	vendor_code varchar(255) null,
 	verified_status varchar(255) default 'PENDING_VERIFICATION' null,
-  primary_user_id varchar(50) null,
+	primary_user_id varchar(50) null,
 	constraint business_ibfk_1
-		foreign key (primary_user_id) references kwebo_prd.user (id)
-			on delete cascade
-);
+	foreign key (primary_user_id) references kwebo_prd.user (id)
+	on delete cascade
+	);
 
-create index idx_bus_verified_status
+	create index idx_bus_verified_status
 	on kwebo_prd.business (verified_status);
 
 
@@ -74,6 +74,12 @@ This will also generate a new Class BusinessEntity repository via annotation pro
 Lazy loading and entity relationships are also supported
 Ability to only do a sub select of columns for performance
 
-BusinessEntity be = new BusinessEntity().setPasportN("somepass").query().getBySet(c);
+	BusinessEntity be = new BusinessEntity().setPasportN("somepass").query().getBySet(c);
 
 Also includes auto mapping to DAO classes and many other features
+
+Other examples
+
+	TripEntity tripEntity = new TripEntity().setId(Long.valueOf(tripId)).query().retrieve(c)
+                  .setNightDriveAlarmId(alarmEntity.getId())
+                  .persist().update(c);
