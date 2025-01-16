@@ -7,14 +7,14 @@ Core package for the Annotation Toolkit Framework
 Let the compiler do the heavy lifting
 Typesafety
 Startup speed
-Elliinate runtime errors
+Eliminate runtime errors
 
 Alternative for JPA
 Generates 'Repositories' at compile time (instant startup for FAAS)
 
 JPA compliant
-Auto DB Schema Maintanance (Fast DB comparison, maintains on changes)
-Manages FKeys / Indexs / Fields
+Auto DB Schema Maintenance (Fast DB comparison, maintains on changes)
+Manages FKeys / Indexes / Fields
 Auditing
 
 Entity DAO Mapping
@@ -44,7 +44,8 @@ public class Business {
 
 }
 
-Will generate 
+Will compare entity to DB
+If table doesn't exist or differs will generate a DDL to create or update the table (only if entity is newer than schema changes)
 
 create table business
 (
@@ -70,6 +71,8 @@ create index idx_bus_verified_status
 
 
 This will also generate a new Class BusinessEntity repository via annotation processing
+Lazy loading and entity relationships are also supported
+Ability to only do a sub select of columns for performance
 
 BusinessEntity be = new BusinessEntity().setPasportN("somepass").query().getBySet(c);
 
