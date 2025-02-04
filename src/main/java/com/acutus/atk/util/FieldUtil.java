@@ -29,6 +29,10 @@ public class FieldUtil {
         return value == null ? 0 : value;
     }
 
+    public static int defaultValue(Integer value, int defaultValue) {
+        return value == null ? defaultValue : value;
+    }
+
     public static void setSerialized(Object dto, Field field, String serial) throws IllegalAccessException, InvocationTargetException {
         field.set(dto, field.getType().equals(String.class) ? serial : parseMap.get(field.getType()).invoke(null, serial));
     }
