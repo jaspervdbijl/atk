@@ -25,6 +25,10 @@ public class FieldUtil {
         return value == null || !value ? false : value;
     }
 
+    public static long nullSafe(Long value) {
+        return value == null ? 0l : value;
+    }
+
     public static int nullSafe(Integer value) {
         return value == null ? 0 : value;
     }
