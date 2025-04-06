@@ -2,10 +2,7 @@ package com.acutus.atk.util;
 
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.TimeZone;
@@ -36,8 +33,16 @@ public class TimeHelper {
         return LocalDateTime.ofInstant(date.toInstant(),defaultZoneId);
     }
 
+    public static LocalDateTime fromFromEpochSecond(int timestamp) {
+        return LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), defaultZoneId);
+    }
+
     public static Timestamp toTimestampFromEpochSecond(int timestamp) {
         return Timestamp.valueOf(LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), defaultZoneId));
+    }
+
+    public static Instant toInstant(LocalDateTime localDateTime) {
+        return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
     }
 
 }

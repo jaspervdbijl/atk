@@ -53,15 +53,7 @@ public class AtkProcessor extends AbstractProcessor {
     }
 
     protected static <T> T jbUnwrap(Class<? extends T> iface, T wrapper) {
-        if (true) return wrapper;
-        T unwrapped = null;
-        try {
-            final Class<?> apiWrappers = wrapper.getClass().getClassLoader().loadClass("org.jetbrains.jps.javac.APIWrappers");
-            final Method unwrapMethod = apiWrappers.getDeclaredMethod("unwrap", Class.class, Object.class);
-            unwrapped = iface.cast(unwrapMethod.invoke(null, iface, wrapper));
-        } catch (Throwable ignored) {
-        }
-        return unwrapped != null ? unwrapped : wrapper;
+        return wrapper;
     }
 
     protected ProcessingEnvironment getProcessingEnv() {
@@ -235,8 +227,8 @@ public class AtkProcessor extends AbstractProcessor {
         }
 
         // replace Atk annotation
-        annotations = annotations.replace("@com.acutus.atk.entity.processor.Atk", "");
-        return annotations + "\n" + String.format("public class %s extends AbstractAtk<%s,%s> {",
+        annotations = annotations.trim().replace("@com.acutus.atk.entity.processor.Atk", "");
+        return annotations.replace("@","\n@") + "\n" + String.format("public class %s extends AbstractAtk<%s,%s> {",
                 getClassName(element), getClassName(element), element.getSimpleName());
     }
 
@@ -426,7 +418,7 @@ public class AtkProcessor extends AbstractProcessor {
         if (!Object.class.getName().equals(superClassName)) {
             Optional<? extends Element> e = roundEnv.getRootElements().stream().filter(s -> s.toString().equals(superClassName)).findFirst();
             if (e.isPresent()) {
-                getElement(entity,roundEnv,element,(TypeElement) e.get());
+                getElement(entity, roundEnv, element, (TypeElement) e.get());
             }
         }
 
@@ -536,10 +528,15 @@ public class AtkProcessor extends AbstractProcessor {
         return fieldName.substring(0, 1).toUpperCase() + (fieldName.length() > 0 ? fieldName.substring(1) : "");
     }
 
+    protected String getSetterExtra(Element parent, Element e) {
+        return "";
+    }
+
     protected String getSetter(Element parent, Element e) {
-        return String.format("public %s set%s(%s %s) {"
-                        + "this._%s.set(%s);"
-                        + "return this;"
+        return String.format("public %s set%s(%s %s) {\n"
+                        + getSetterExtra(parent, e)
+                        + "\tthis._%s.set(%s);"
+                        + "\treturn this;"
                         + "};"
                 , getClassName(parent), methodName(e.getSimpleName().toString()), e.asType().toString()
                 , e.getSimpleName().toString()

@@ -68,7 +68,7 @@ public class ReflectFields implements Iterable<Field> {
 
 
     public Strings getNames() {
-        return fields.stream().map(f -> f.getName()).collect(Collectors.toCollection(Strings::new));
+        return fields.stream().map(Field::getName).collect(Collectors.toCollection(Strings::new));
     }
 
     public Optional<Field> get(String name) {
