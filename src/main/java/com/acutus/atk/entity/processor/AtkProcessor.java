@@ -45,7 +45,6 @@ import java.util.stream.Stream;
 @SupportedAnnotationTypes(
         "com.acutus.atk.entity.processor.Atk")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
-@AutoService(Processor.class)
 public class AtkProcessor extends AbstractProcessor {
 
     public AtkProcessor() {
