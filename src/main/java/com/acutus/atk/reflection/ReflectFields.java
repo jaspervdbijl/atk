@@ -21,13 +21,13 @@ import static com.acutus.atk.util.AtkUtil.handle;
 @Slf4j
 public class ReflectFields implements Iterable<Field> {
 
-    private List<Field> fields = new ArrayList<>();
+    private final List<Field> fields = new ArrayList<>();
 
     public ReflectFields() {
     }
 
     public ReflectFields cloneRefFields() {
-        return new ReflectFields(fields.stream().collect(Collectors.toList()));
+        return new ReflectFields(new ArrayList<>(fields));
     }
 
     public ReflectFields addAll(Collection<Field> fields) {

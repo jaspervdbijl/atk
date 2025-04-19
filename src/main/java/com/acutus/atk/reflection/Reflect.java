@@ -1,5 +1,7 @@
 package com.acutus.atk.reflection;
 
+import lombok.Getter;
+
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -7,9 +9,11 @@ public class Reflect<T> {
     private static ConcurrentHashMap<Class, ReflectFields> FIELD_MAP = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Class, ReflectMethods> METHOD_MAP = new ConcurrentHashMap<>();
 
-    private ReflectFields fields;
-    private ReflectMethods methods;
-    private T entity;
+    @Getter
+    private final ReflectFields fields;
+    @Getter
+    private final ReflectMethods methods;
+    private final T entity;
 
     public Reflect(T entity) {
         this.entity = entity;
@@ -37,14 +41,6 @@ public class Reflect<T> {
             METHOD_MAP.put(type, new ReflectMethods(type));
         }
         return METHOD_MAP.get(type);
-    }
-
-    public ReflectFields getFields() {
-        return fields;
-    }
-
-    public ReflectMethods getMethods() {
-        return methods;
     }
 
     public List<String> getNames() {
