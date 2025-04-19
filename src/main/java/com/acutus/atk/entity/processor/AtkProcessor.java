@@ -7,7 +7,6 @@ import static com.acutus.atk.util.StringUtils.nonNullStr;
 
 import com.acutus.atk.util.Strings;
 import com.acutus.atk.util.collection.Tuple4;
-import com.google.auto.service.AutoService;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 import lombok.SneakyThrows;
