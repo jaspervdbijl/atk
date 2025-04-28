@@ -135,6 +135,7 @@ public class AtkProcessor extends AbstractProcessor {
                         "import static com.acutus.atk.util.AtkUtil.handle;",
                         "import java.util.stream.Collectors;",
                         "import java.lang.reflect.Field;",
+                        "import lombok.Getter;",
                         "import com.acutus.atk.reflection.Reflect;");
 
         imports.addAll(getDaoClass(element).stream().map(atk -> String.format("import %s;", atk.getFirst().toString())).
