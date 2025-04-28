@@ -219,6 +219,7 @@ public class AtkProcessor extends AbstractProcessor {
                 .map(a -> a.toString()).collect(Collectors.joining(" "))
                 .replace("@lombok.NoArgsConstructor", "")
                 .replace("@lombok.AllArgsConstructor", "")
+                .replace("@lombok.Data", "")
                 .replace("@lombok.Builder", "");
         for (String remove : removeStrings) {
             annotations = removeSection(annotations, remove);
