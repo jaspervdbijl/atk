@@ -39,7 +39,13 @@ public class AtkUtil {
 
     @SneakyThrows
     public static <T, R> R handle(CallNilRet<R> call) {
-        return call.call();
+        try {
+            return call.call();
+        } catch (Exception ex) {
+            log.warn(ex.getMessage(), ex);
+            throw ex;
+        }
+
     }
 
     @SneakyThrows
