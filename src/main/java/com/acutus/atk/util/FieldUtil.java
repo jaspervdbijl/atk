@@ -42,6 +42,22 @@ public class FieldUtil {
         field.set(dto, field.getType().equals(String.class) ? serial : parseMap.get(field.getType()).invoke(null, serial));
     }
 
+    public static Integer toInt(Short value) {
+        return value != null ? value.intValue() : null;
+    }
+
+    public static Integer toInt(Float value) {
+        return value != null ? value.intValue() : null;
+    }
+
+    public static Integer toInt(Long value) {
+        return value != null ? value.intValue() : null;
+    }
+
+    public static Double toDouble(Float value) {
+        return value != null ? value.doubleValue() : null;
+    }
+
     @SneakyThrows
     public static void setHexAsBit(Object entity, String hex, boolean inverse, boolean reverse) {
         String binary = Strings.splitByLength(hex, 2)
